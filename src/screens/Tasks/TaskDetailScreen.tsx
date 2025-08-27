@@ -5,10 +5,10 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Task, toggleTaskCompletion, deleteTask } from '../../redux/slices/taskSlice';
-import { updateTask as fbUpdateTask, deleteTask as fbDeleteTask } from '../../firebase/config';
 import { repoUpdateTask, repoDeleteTask } from '../../storage/offlineRepo';
 
 import { format } from 'date-fns';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'TaskDetail'>;
 
@@ -39,7 +39,7 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
             style={styles.headerButton}
             onPress={handleEditPress}
           >
-            {/* <Ionicons name="create-outline" size={22} color="#1c7ed6" /> */}
+            <Ionicons name="create-outline" size={22} color="#1c7ed6" />
           </TouchableOpacity>
         ),
       });
@@ -113,36 +113,31 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
                 style={[styles.checkbox, task.isCompleted && styles.checkboxCompleted]}
                 onPress={handleToggleComplete}
                 disabled={isLoading}
+                activeOpacity={0.7}
               >
-                {task.isCompleted && <Text>✓</Text>}
+                {task.isCompleted ? (
+                  <Ionicons name="checkmark" size={18} color="#fff" />
+                ) : (
+                  <Ionicons name="ellipse-outline" size={18} color="#bbb" />
+                )}
               </TouchableOpacity>
               <Text style={[styles.title, task.isCompleted && styles.completedTask]}>
                 {task.title}
               </Text>
             </View>
-            
-            <View style={styles.metaContainer}>
-              {task.dueDate && (
-                <View style={styles.metaItem}>
-                  {/* <Ionicons name="calendar-outline" size={16} color="#666" /> */}
-                  <Text style={styles.metaText}>
-                    Due: {format(new Date(task.dueDate), 'MMM d, yyyy')}
-                  </Text>
-                </View>
-              )}
-              
-              <View style={styles.metaItem}>
-                {/* <Ionicons name="time-outline" size={16} color="#666" /> */}
-                <Text style={styles.metaText}>
-                  Created: {format(new Date(task.createdAt), 'MMM d, yyyy')}
+
+            <View style={styles.chipsRow}>
+              <View style={[styles.chip, task.isCompleted ? styles.chipCompleted : styles.chipActive]}>
+                <Ionicons name={task.isCompleted ? 'checkmark-circle' : 'time-outline'} size={14} color={task.isCompleted ? '#2b8a3e' : '#1c7ed6'} />
+                <Text style={[styles.chipText, task.isCompleted ? styles.chipTextCompleted : styles.chipTextActive]}>
+                  {task.isCompleted ? 'Completed' : 'Active'}
                 </Text>
               </View>
-              
-              {task.updatedAt !== task.createdAt && (
-                <View style={styles.metaItem}>
-                  {/* <Ionicons name="refresh-outline" size={16} color="#666" /> */}
-                  <Text style={styles.metaText}>
-                    Updated: {format(new Date(task.updatedAt), 'MMM d, yyyy')}
+              {task.dueDate && (
+                <View style={[styles.chip, styles.chipDate]}>
+                  <Ionicons name="calendar-outline" size={14} color="#1c7ed6" />
+                  <Text style={[styles.chipText, styles.chipTextActive]}>
+                    {format(new Date(task.dueDate), 'MMM d, yyyy')}
                   </Text>
                 </View>
               )}
@@ -161,8 +156,9 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
               style={[styles.actionButton, styles.editButton]}
               onPress={handleEditPress}
               disabled={isLoading}
+              activeOpacity={0.85}
             >
-              {/* <Ionicons name="create-outline" size={18} color="#fff" /> */}
+              <Ionicons name="create-outline" size={18} color="#fff" />
               <Text style={styles.actionButtonText}>Edit Task</Text>
             </TouchableOpacity>
             
@@ -170,8 +166,9 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
               style={[styles.actionButton, styles.deleteButton]}
               onPress={handleDelete}
               disabled={isLoading}
+              activeOpacity={0.85}
             >
-              {/* <Ionicons name="trash-outline" size={18} color="#fff" /> */}
+              <Ionicons name="trash-outline" size={18} color="#fff" />
               <Text style={styles.actionButtonText}>Delete Task</Text>
             </TouchableOpacity>
           </View>
@@ -241,20 +238,37 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#999',
   },
-  metaContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 16,
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 8,
   },
-  metaItem: {
+  chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: '#eef2f7',
   },
-  metaText: {
-    marginLeft: 8,
-    color: '#666',
-    fontSize: 14,
+  chipActive: {
+    backgroundColor: '#e7f5ff',
+  },
+  chipCompleted: {
+    backgroundColor: '#e6fcf5',
+  },
+  chipDate: {
+    backgroundColor: '#e7f5ff',
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  chipTextActive: {
+    color: '#1c7ed6',
+  },
+  chipTextCompleted: {
+    color: '#2b8a3e',
   },
   section: {
     backgroundColor: '#fff',

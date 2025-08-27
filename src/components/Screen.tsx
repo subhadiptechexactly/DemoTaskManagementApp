@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
-import { StatusBar, StatusBarStyle, StyleSheet, SafeAreaView } from 'react-native';
+import { StatusBar, StatusBarStyle, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ScreenProps = {
   children: ReactNode;
@@ -23,7 +24,7 @@ const Screen = ({
         backgroundColor={statusBarColor}
         translucent={barTranslucent}
       />
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top', 'left', 'right', 'bottom']}>
         {children}
       </SafeAreaView>
     </>

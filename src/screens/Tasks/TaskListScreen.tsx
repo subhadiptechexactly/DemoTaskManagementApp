@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import Screen from '../../components/Screen';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,6 +20,7 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
   const dispatch = useDispatch();
   const { tasks, isLoading } = useSelector((state: any) => state.tasks);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
   const loadTasks = useCallback(async () => {
     dispatch(fetchTasksStart());
@@ -101,35 +102,52 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
     loadTasks();
   };
 
+  const filtered = useMemo(() => {
+    if (filter === 'active') return tasks.filter((t: Task) => !t.isCompleted);
+    if (filter === 'completed') return tasks.filter((t: Task) => t.isCompleted);
+    return tasks;
+  }, [tasks, filter]);
+
   const renderItem = ({ item }: { item: Task }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.taskItem}
       onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
+      activeOpacity={0.8}
     >
+      <View style={[styles.checkbox, item.isCompleted && styles.checkboxCompleted]}>
+        {item.isCompleted ? (
+          <Ionicons name="checkmark" size={18} color="#fff" />
+        ) : (
+          <Ionicons name="ellipse-outline" size={18} color="#bbb" />
+        )}
+      </View>
+
       <View style={styles.taskContent}>
-        <Text 
+        <Text
           style={[styles.taskTitle, item.isCompleted && styles.completedTask]}
           numberOfLines={1}
         >
           {item.title}
         </Text>
-        {item.description && (
-          <Text 
+        {!!item.description && (
+          <Text
             style={[styles.taskDescription, item.isCompleted && styles.completedTask]}
             numberOfLines={1}
           >
             {item.description}
           </Text>
         )}
+        {!!item.dueDate && (
+          <View style={styles.badgeRow}>
+            <View style={styles.badge}>
+              <Ionicons name="calendar-outline" size={12} color="#1c7ed6" />
+              <Text style={styles.badgeText}>{new Date(item.dueDate).toLocaleDateString()}</Text>
+            </View>
+          </View>
+        )}
       </View>
-      <TouchableOpacity 
-        style={[styles.checkbox, item.isCompleted && styles.checkboxCompleted]}
-        onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
-      >
-        {item.isCompleted && 
-        <Text>Completed</Text>
-        }
-      </TouchableOpacity>
+
+      <Ionicons name="chevron-forward" size={18} color="#ccc" />
     </TouchableOpacity>
   );
 
@@ -144,8 +162,32 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
   return (
     <Screen>
       <View style={styles.container}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.headerTitle}>My Tasks</Text>
+            <Text style={styles.headerSubtitle}>{tasks.length} total</Text>
+          </View>
+          <TouchableOpacity style={styles.refreshBtn} onPress={handleRefresh}>
+            <Ionicons name="refresh" size={18} color="#1c7ed6" />
+            <Text style={styles.refreshText}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.filterRow}>
+          {(['all','active','completed'] as const).map(f => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterChip, filter === f && styles.filterChipActive]}
+              onPress={() => setFilter(f)}
+            >
+              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
+                {f === 'all' ? 'All' : f === 'active' ? 'Active' : 'Completed'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <FlatList
-          data={tasks}
+          data={filtered}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
@@ -176,6 +218,56 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     padding: 16,
+    paddingTop: 24,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#222',
+  },
+  headerSubtitle: {
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  refreshBtn: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    backgroundColor: '#e7f5ff',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  refreshText: {
+    color: '#1c7ed6',
+    fontWeight: '600',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  filterChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#eef2f7',
+    marginRight: 8,
+  },
+  filterChipActive: {
+    backgroundColor: '#1c7ed6',
+  },
+  filterText: {
+    color: '#475569',
+    fontWeight: '600',
+  },
+  filterTextActive: {
+    color: '#fff',
   },
   loadingContainer: {
     flex: 1,
@@ -190,18 +282,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
+    borderRadius: 12,
+    padding: 14,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.06,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 1,
   },
   taskContent: {
     flex: 1,
-    marginRight: 12,
+    marginLeft: 12,
+    marginRight: 8,
   },
   taskTitle: {
     fontSize: 16,
@@ -218,17 +311,36 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: '#e2e8f0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxCompleted: {
     backgroundColor: '#1c7ed6',
     borderColor: '#1c7ed6',
+  },
+  badgeRow: {
+    marginTop: 6,
+    flexDirection: 'row',
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#e7f5ff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  badgeText: {
+    color: '#1c7ed6',
+    fontSize: 12,
+    fontWeight: '600',
   },
   emptyState: {
     flex: 1,

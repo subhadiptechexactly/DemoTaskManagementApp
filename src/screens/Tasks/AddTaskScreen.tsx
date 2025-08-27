@@ -9,6 +9,7 @@ import { getCurrentUserId } from '../../firebase/config';
 import { repoAddTask, repoUpdateTask } from '../../storage/offlineRepo';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -129,27 +130,33 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
         >
           <View style={styles.formGroup}>
             <Text style={styles.label}>Title *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter task title"
-              value={title}
-              onChangeText={setTitle}
-              maxLength={100}
-              autoFocus
-            />
+            <View style={styles.inputRow}>
+              <Ionicons name="document-text-outline" size={18} color="#64748b" />
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="Enter task title"
+                value={title}
+                onChangeText={setTitle}
+                maxLength={100}
+                autoFocus
+              />
+            </View>
           </View>
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Description</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Enter task description (optional)"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
+            <View style={[styles.inputRow, styles.textAreaRow]}>
+              <Ionicons name="create-outline" size={18} color="#64748b" style={{ marginTop: 6 }} />
+              <TextInput
+                style={[styles.input, styles.textArea, styles.inputFlex]}
+                placeholder="Enter task description (optional)"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
           </View>
 
           <View style={styles.formGroup}>
@@ -158,9 +165,17 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
               style={styles.dateInput}
               onPress={() => setShowDatePicker(true)}
             >
-              <Text style={[styles.dateText, !dueDate && styles.placeholderText]}>
-                {dueDate ? dueDate.toLocaleDateString() : 'Select a due date'}
-              </Text>
+              <View style={styles.dateRow}>
+                <Ionicons name="calendar-outline" size={18} color="#64748b" />
+                <Text style={[styles.dateText, !dueDate && styles.placeholderText]}>
+                  {dueDate ? dueDate.toLocaleDateString() : 'Select a due date'}
+                </Text>
+              </View>
+              {!!dueDate && (
+                <View style={styles.dateBadge}>
+                  <Text style={styles.dateBadgeText}>Set</Text>
+                </View>
+              )}
             </TouchableOpacity>
             
             {showDatePicker && (
@@ -190,7 +205,9 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           style={[styles.button, styles.cancelButton]}
           onPress={() => navigation.goBack()}
           disabled={isSubmitting}
+          activeOpacity={0.8}
         >
+          <Ionicons name="close" size={18} color="#495057" />
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
         
@@ -202,7 +219,9 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           ]}
           onPress={handleSubmit}
           disabled={!title.trim() || isSubmitting}
+          activeOpacity={0.9}
         >
+          <Ionicons name={isEditMode ? 'save-outline' : 'add'} size={18} color="#fff" />
           <Text style={styles.submitButtonText}>
             {isSubmitting 
               ? (isEditMode ? 'Updating...' : 'Adding...')
@@ -235,6 +254,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   label: {
     fontSize: 16,
     fontWeight: '500',
@@ -250,9 +274,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     color: '#333',
   },
+  inputFlex: {
+    flex: 1,
+  },
   textArea: {
     minHeight: 100,
     textAlignVertical: 'top',
+  },
+  textAreaRow: {
+    alignItems: 'flex-start',
   },
   dateInput: {
     flexDirection: 'row',
@@ -264,12 +294,28 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#f9f9f9',
   },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   dateText: {
     fontSize: 16,
     color: '#333',
   },
   placeholderText: {
     color: '#999',
+  },
+  dateBadge: {
+    backgroundColor: '#e7f5ff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  dateBadgeText: {
+    color: '#1c7ed6',
+    fontSize: 12,
+    fontWeight: '600',
   },
   clearDateButton: {
     marginTop: 8,
@@ -296,6 +342,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   cancelButton: {
     backgroundColor: '#f1f3f5',
