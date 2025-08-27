@@ -1,9 +1,16 @@
-import auth from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+
+export interface UserProfile {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+}
 
 interface AuthResponse {
   success: boolean;
-  user?: any; // Consider replacing 'any' with a proper User type
+  user: UserProfile | null;
+  token?: string;
   error?: string;
 }
 
@@ -14,12 +21,12 @@ export const signUpWithEmail = async (email: string, password: string, name: str
     const user = userCredential.user;
     
     if (!user) {
-      return { success: false, error: 'Failed to create user account' };
+      throw new Error('Failed to create user');
     }
 
-    // Create user document in Firestore
+    // Store additional user data in Firestore
     await firestore().collection('users').doc(user.uid).set({
-      email: user.email,
+      email,
       displayName: name,
       createdAt: firestore.FieldValue.serverTimestamp(),
       updatedAt: firestore.FieldValue.serverTimestamp(),
@@ -30,11 +37,21 @@ export const signUpWithEmail = async (email: string, password: string, name: str
       displayName: name,
     });
 
-    return { success: true, user };
+    const token = await user.getIdToken();
+    return { 
+      success: true, 
+      user: { 
+        uid: user.uid, 
+        email: user.email, 
+        displayName: name 
+      }, 
+      token 
+    };
   } catch (error: any) {
     console.error('Signup error:', error);
     return { 
       success: false, 
+      user: null,
       error: error.message || 'Failed to create account. Please try again.' 
     };
   }
@@ -43,11 +60,24 @@ export const signUpWithEmail = async (email: string, password: string, name: str
 export const signInWithEmail = async (email: string, password: string): Promise<AuthResponse> => {
   try {
     const userCredential = await auth().signInWithEmailAndPassword(email, password);
-    return { success: true, user: userCredential.user };
+    if (!userCredential.user) {
+      throw new Error('No user found');
+    }
+    const token = await userCredential.user.getIdToken();
+    return {
+      success: true,
+      user: {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+      },
+      token,
+    };
   } catch (error: any) {
     console.error('Login error:', error);
     return { 
       success: false, 
+      user: null,
       error: error.message || 'Failed to sign in. Please check your credentials.' 
     };
   }
@@ -56,17 +86,21 @@ export const signInWithEmail = async (email: string, password: string): Promise<
 export const signOut = async (): Promise<AuthResponse> => {
   try {
     await auth().signOut();
-    return { success: true };
+    return { 
+      success: true, 
+      user: null 
+    };
   } catch (error: any) {
     console.error('Sign out error:', error);
     return { 
       success: false, 
-      error: error.message || 'Failed to sign out. Please try again.' 
+      user: null,
+      error: error.message || 'Failed to sign out' 
     };
   }
 };
 
-export const getCurrentUser = () => {
+export const getCurrentUser = (): FirebaseAuthTypes.User | null => {
   return auth().currentUser;
 };
 

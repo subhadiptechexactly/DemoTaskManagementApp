@@ -1,20 +1,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { useAuth } from '../contexts/AuthContext';
+import { ActivityIndicator, View } from 'react-native';
 import AuthStack from './AuthStack';
 import AppStack from './AppStack';
 
-// Define the auth state type
-type AuthState = {
-  user: any; // Replace 'any' with your user type
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-};
-
-// Define the root stack param list
 export type RootStackParamList = {
   Auth: undefined;
   App: undefined;
@@ -22,9 +13,18 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+const LoadingScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ActivityIndicator size="large" />
+  </View>
+);
+
 const RootNavigator = () => {
-  const authState = useSelector((state: RootState) => state.auth as AuthState);
-  const isAuthenticated = authState.isAuthenticated;
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <NavigationContainer>

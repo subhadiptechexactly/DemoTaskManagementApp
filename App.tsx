@@ -15,6 +15,7 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { initFirebase } from './src/firebase/config';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AuthProvider } from './src/contexts/AuthContext';
 
 // Ignore specific warnings
 LogBox.ignoreLogs([
@@ -34,16 +35,18 @@ const App = () => {
   }, []);
 
   return (
-    <ReduxProvider store={store}>
-      <SafeAreaProvider>
-        <ThemeProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-            <RootNavigator />
-          </GestureHandlerRootView>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </ReduxProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ReduxProvider store={store}>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+              <RootNavigator />
+            </AuthProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </ReduxProvider>
+    </GestureHandlerRootView>
   );
 };
 
