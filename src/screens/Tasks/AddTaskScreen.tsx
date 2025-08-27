@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask, updateTask, Task } from '../../redux/slices/taskSlice';
+import { addTask as fbAddTask, updateTask as fbUpdateTask } from '../../firebase/config';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -59,21 +60,48 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
     try {
       setIsSubmitting(true);
       
-      const taskData = {
-        id: isEditMode ? taskId : Date.now().toString(),
-        title: title.trim(),
-        description: description.trim(),
-        dueDate: dueDate ? dueDate.toISOString() : undefined,
-        isCompleted: isEditMode ? existingTask.isCompleted : false,
-        createdAt: isEditMode ? existingTask.createdAt : new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        userId: 'user-1', // TODO: Replace with actual user ID
-      };
-
       if (isEditMode) {
-        dispatch(updateTask(taskData));
+        // Optimistic update in Redux
+        const optimistic: Task = {
+          id: existingTask.id,
+          title: title.trim(),
+          description: description.trim() || undefined,
+          dueDate: dueDate ? dueDate.toISOString() : undefined,
+          isCompleted: existingTask.isCompleted,
+          createdAt: existingTask.createdAt,
+          updatedAt: new Date().toISOString(),
+          userId: existingTask.userId,
+        };
+        dispatch(updateTask(optimistic));
+        // Persist to Firestore
+        const { error } = await fbUpdateTask(existingTask.id, {
+          title: optimistic.title,
+          description: optimistic.description || null,
+          dueDate: optimistic.dueDate ? new Date(optimistic.dueDate) : null,
+        });
+        if (error) throw new Error(error);
       } else {
-        dispatch(addTask(taskData));
+        // Optimistic add in Redux (temporary id)
+        const tempId = `tmp-${Date.now()}`;
+        const optimistic: Task = {
+          id: tempId,
+          title: title.trim(),
+          description: description.trim() || undefined,
+          dueDate: dueDate ? dueDate.toISOString() : undefined,
+          isCompleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userId: 'me',
+        };
+        dispatch(addTask(optimistic));
+        // Persist to Firestore
+        const { error } = await fbAddTask({
+          title: optimistic.title,
+          description: optimistic.description || null,
+          dueDate: optimistic.dueDate ? new Date(optimistic.dueDate) : null,
+          isCompleted: false,
+        });
+        if (error) throw new Error(error);
       }
       
       // Show success message

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Screen from '../../components/Screen';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Task, toggleTaskCompletion, deleteTask } from '../../redux/slices/taskSlice';
+import { updateTask as fbUpdateTask, deleteTask as fbDeleteTask } from '../../firebase/config';
 
 import { format } from 'date-fns';
 
@@ -15,11 +16,17 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
   const dispatch = useDispatch();
   
   // Get the task from the Redux store
-  const task = useSelector((state: any) => 
+  const task: Task | undefined = useSelector((state: any) => 
     state.tasks.tasks.find((t: Task) => t.id === taskId)
   );
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // Stable edit handler used in header
+  const handleEditPress = useCallback(() => {
+    if (!task) return;
+    navigation.navigate('AddTask', { taskId: task.id });
+  }, [navigation, task]);
 
   useEffect(() => {
     // Set the header title to the task title
@@ -36,7 +43,7 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
         ),
       });
     }
-  }, [task, navigation]);
+  }, [task, navigation, handleEditPress]);
 
   if (!task) {
     return (
@@ -53,7 +60,11 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
       setIsLoading(true);
       // Dispatch the toggle action
       dispatch(toggleTaskCompletion(taskId));
-      // TODO: Update task in the backend
+      // Persist to Firestore
+      const { error } = await fbUpdateTask(taskId, {
+        isCompleted: !task?.isCompleted,
+      });
+      if (error) throw new Error(error);
     } catch (error) {
       Alert.alert('Error', 'Failed to update task status');
     } finally {
@@ -61,10 +72,7 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
     }
   };
 
-  const handleEditPress = () => {
-    // Navigate to edit screen (which we'll implement as AddTask with an edit mode)
-    navigation.navigate('AddTask', { taskId: task.id });
-  };
+  
 
   const handleDelete = () => {
     Alert.alert(
@@ -80,7 +88,9 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
               setIsLoading(true);
               // Dispatch the delete action
               dispatch(deleteTask(taskId));
-              // TODO: Delete task from the backend
+              // Persist to Firestore
+              const { error } = await fbDeleteTask(taskId);
+              if (error) throw new Error(error);
               navigation.goBack();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete task');

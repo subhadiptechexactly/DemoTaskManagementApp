@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import Screen from '../../components/Screen';
 import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { fetchTasksStart, fetchTasksSuccess, fetchTasksFailure, Task } from '../../redux/slices/taskSlice';
+import { getTasks } from '../../firebase/config';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Define the navigation prop type
@@ -16,47 +17,44 @@ interface TaskListScreenProps {
 
 const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
   const dispatch = useDispatch();
-  const { tasks, isLoading, error } = useSelector((state: any) => state.tasks);
+  const { tasks, isLoading } = useSelector((state: any) => state.tasks);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadTasks = async () => {
-    try {
-      dispatch(fetchTasksStart());
-      // TODO: Replace with actual API call to fetch tasks
-      const mockTasks: Task[] = [
-        {
-          id: '1',
-          title: 'Complete project setup',
-          description: 'Set up the initial project structure and navigation',
-          isCompleted: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          userId: 'user-1',
-        },
-        {
-          id: '2',
-          title: 'Implement authentication',
-          description: 'Set up Firebase authentication',
-          isCompleted: false,
-          dueDate: '2023-12-31',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          userId: 'user-1',
-        },
-      ];
-      
-      dispatch(fetchTasksSuccess(mockTasks));
-    } catch (err) {
-      dispatch(fetchTasksFailure('Failed to load tasks'));
-      Alert.alert('Error', 'Failed to load tasks. Please try again.');
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  const loadTasks = useCallback(async () => {
+    dispatch(fetchTasksStart());
+    // Set up Firestore subscription
+    const unsubscribe = getTasks((rawTasks) => {
+      try {
+        const tasks: Task[] = rawTasks.map((t: any) => ({
+          id: t.id,
+          title: t.title,
+          description: t.description,
+          isCompleted: !!t.isCompleted,
+          dueDate: t.dueDate
+            ? (t.dueDate.toDate ? t.dueDate.toDate().toISOString() : t.dueDate)
+            : undefined,
+          createdAt: t.createdAt?.toDate ? t.createdAt.toDate().toISOString() : (t.createdAt || new Date().toISOString()),
+          updatedAt: t.updatedAt?.toDate ? t.updatedAt.toDate().toISOString() : (t.updatedAt || new Date().toISOString()),
+          userId: t.userId,
+        }));
+        dispatch(fetchTasksSuccess(tasks));
+      } catch (e) {
+        dispatch(fetchTasksFailure('Failed to parse tasks'));
+      }
+    });
+    setRefreshing(false);
+    return unsubscribe;
+  }, [dispatch]);
 
   useEffect(() => {
-    loadTasks();
-  }, []);
+    let unsub: undefined | (() => void);
+    (async () => {
+      unsub = await loadTasks();
+    })();
+    return () => {
+      if (unsub) unsub();
+    };
+  }, [loadTasks]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -86,7 +84,7 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
       </View>
       <TouchableOpacity 
         style={[styles.checkbox, item.isCompleted && styles.checkboxCompleted]}
-        onPress={() => {}}
+        onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
       >
         {item.isCompleted && 
         <Text>Completed</Text>
