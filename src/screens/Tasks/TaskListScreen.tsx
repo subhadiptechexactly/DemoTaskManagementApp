@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import Screen from '../../components/Screen';
 import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
@@ -103,30 +104,32 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={tasks}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="checkmark-done" size={48} color="#ddd" />
-            <Text style={styles.emptyStateText}>No tasks yet</Text>
-            <Text style={styles.emptyStateSubtext}>Tap + to add a new task</Text>
-          </View>
-        }
-      />
-      
-      <TouchableOpacity
-      style={styles.addButton}
-      onPress={() => navigation.navigate('AddTask', {})}
-    >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
-    </View>
+    <Screen>
+      <View style={styles.container}>
+        <FlatList
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="checkmark-done" size={48} color="#ddd" />
+              <Text style={styles.emptyStateText}>No tasks yet</Text>
+              <Text style={styles.emptyStateSubtext}>Tap + to add a new task</Text>
+            </View>
+          }
+        />
+        
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('AddTask', {})}
+        >
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </Screen>
   );
 };
 
@@ -134,6 +137,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    padding: 16,
   },
   loadingContainer: {
     flex: 1,

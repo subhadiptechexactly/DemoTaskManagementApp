@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import Screen from '../../components/Screen';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
@@ -95,65 +96,70 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Title *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter task title"
-            value={title}
-            onChangeText={setTitle}
-            maxLength={100}
-            autoFocus
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Description</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Enter task description (optional)"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Due Date (Optional)</Text>
-          <TouchableOpacity 
-            style={styles.dateInput}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={[styles.dateText, !dueDate && styles.placeholderText]}>
-              {dueDate ? dueDate.toLocaleDateString() : 'Select a due date'}
-            </Text>
-            {/* <Ionicons name="calendar-outline" size={20} color="#666" /> */}
-          </TouchableOpacity>
-          
-          {showDatePicker && (
-            <DateTimePicker
-              value={dueDate || new Date()}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-              minimumDate={new Date()}
+    <View style={{ flex: 1 }}>
+      <Screen>
+        <ScrollView 
+          style={styles.container} 
+          contentContainerStyle={styles.scrollContent} 
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Title *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter task title"
+              value={title}
+              onChangeText={setTitle}
+              maxLength={100}
+              autoFocus
             />
-          )}
-          
-          {dueDate && (
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Enter task description (optional)"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Due Date (Optional)</Text>
             <TouchableOpacity 
-              style={styles.clearDateButton}
-              onPress={() => setDueDate(null)}
+              style={styles.dateInput}
+              onPress={() => setShowDatePicker(true)}
             >
-              <Text style={styles.clearDateText}>Clear date</Text>
+              <Text style={[styles.dateText, !dueDate && styles.placeholderText]}>
+                {dueDate ? dueDate.toLocaleDateString() : 'Select a due date'}
+              </Text>
             </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
+            
+            {showDatePicker && (
+              <DateTimePicker
+                value={dueDate || new Date()}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+              />
+            )}
+            
+            {dueDate && (
+              <TouchableOpacity 
+                style={styles.clearDateButton}
+                onPress={() => setDueDate(null)}
+              >
+                <Text style={styles.clearDateText}>Clear date</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
+      </Screen>
 
       <View style={styles.footer}>
         <TouchableOpacity 
@@ -165,7 +171,11 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[styles.button, styles.submitButton, (!title.trim() || isSubmitting) && styles.buttonDisabled]}
+          style={[
+            styles.button, 
+            styles.submitButton, 
+            (!title.trim() || isSubmitting) && styles.buttonDisabled
+          ]}
           onPress={handleSubmit}
           disabled={!title.trim() || isSubmitting}
         >
@@ -184,6 +194,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    padding: 16,
   },
   scrollContent: {
     padding: 16,

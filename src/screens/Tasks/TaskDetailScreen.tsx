@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import Screen from '../../components/Screen';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
@@ -39,9 +40,11 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
 
   if (!task) {
     return (
-      <View style={styles.container}>
-        <Text>Task not found</Text>
-      </View>
+      <Screen>
+        <View style={styles.container}>
+          <Text>Task not found</Text>
+        </View>
+      </Screen>
     );
   }
 
@@ -90,87 +93,102 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <TouchableOpacity 
-              style={[styles.checkbox, task.isCompleted && styles.checkboxCompleted]}
-              onPress={handleToggleComplete}
-              disabled={isLoading}
-            >
-              {task.isCompleted && 
-              <Text>Completed</Text>
-              }
-            </TouchableOpacity>
-            <Text style={[styles.title, task.isCompleted && styles.completedTask]}>
-              {task.title}
-            </Text>
-          </View>
-          
-          <View style={styles.metaContainer}>
-            {task.dueDate && (
-              <View style={styles.metaItem}>
-                {/* <Ionicons name="calendar-outline" size={16} color="#666" /> */}
-                <Text style={styles.metaText}>
-                  Due: {format(new Date(task.dueDate), 'MMM d, yyyy')}
-                </Text>
-              </View>
-            )}
-            
-            <View style={styles.metaItem}>
-              {/* <Ionicons name="time-outline" size={16} color="#666" /> */}
-              <Text style={styles.metaText}>
-                Created: {format(new Date(task.createdAt), 'MMM d, yyyy')}
+    <Screen>
+      <ScrollView 
+        style={styles.container} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <View style={styles.titleContainer}>
+              <TouchableOpacity 
+                style={[styles.checkbox, task.isCompleted && styles.checkboxCompleted]}
+                onPress={handleToggleComplete}
+                disabled={isLoading}
+              >
+                {task.isCompleted && <Text>✓</Text>}
+              </TouchableOpacity>
+              <Text style={[styles.title, task.isCompleted && styles.completedTask]}>
+                {task.title}
               </Text>
             </View>
             
-            {task.updatedAt !== task.createdAt && (
+            <View style={styles.metaContainer}>
+              {task.dueDate && (
+                <View style={styles.metaItem}>
+                  {/* <Ionicons name="calendar-outline" size={16} color="#666" /> */}
+                  <Text style={styles.metaText}>
+                    Due: {format(new Date(task.dueDate), 'MMM d, yyyy')}
+                  </Text>
+                </View>
+              )}
+              
               <View style={styles.metaItem}>
-                {/* <Ionicons name="refresh-outline" size={16} color="#666" /> */}
+                {/* <Ionicons name="time-outline" size={16} color="#666" /> */}
                 <Text style={styles.metaText}>
-                  Updated: {format(new Date(task.updatedAt), 'MMM d, yyyy')}
+                  Created: {format(new Date(task.createdAt), 'MMM d, yyyy')}
                 </Text>
               </View>
-            )}
+              
+              {task.updatedAt !== task.createdAt && (
+                <View style={styles.metaItem}>
+                  {/* <Ionicons name="refresh-outline" size={16} color="#666" /> */}
+                  <Text style={styles.metaText}>
+                    Updated: {format(new Date(task.updatedAt), 'MMM d, yyyy')}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
 
-        {task.description && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{task.description}</Text>
+          {task.description && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.description}>{task.description}</Text>
+            </View>
+          )}
+
+          <View style={styles.actions}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.editButton]}
+              onPress={handleEditPress}
+              disabled={isLoading}
+            >
+              {/* <Ionicons name="create-outline" size={18} color="#fff" /> */}
+              <Text style={styles.actionButtonText}>Edit Task</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={handleDelete}
+              disabled={isLoading}
+            >
+              {/* <Ionicons name="trash-outline" size={18} color="#fff" /> */}
+              <Text style={styles.actionButtonText}>Delete Task</Text>
+            </TouchableOpacity>
           </View>
-        )}
-
-        <View style={styles.actions}>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.editButton]}
-            onPress={handleEditPress}
-            disabled={isLoading}
-          >
-            {/* <Ionicons name="create-outline" size={18} color="#fff" /> */}
-            <Text style={styles.actionButtonText}>Edit Task</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.deleteButton]}
-            onPress={handleDelete}
-            disabled={isLoading}
-          >
-            {/* <Ionicons name="trash-outline" size={18} color="#fff" /> */}
-            <Text style={styles.actionButtonText}>Delete Task</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   scrollContent: {
     padding: 16,
