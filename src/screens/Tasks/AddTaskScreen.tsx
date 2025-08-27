@@ -9,7 +9,7 @@ import { getCurrentUserId } from '../../firebase/config';
 import { repoAddTask, repoUpdateTask } from '../../storage/offlineRepo';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
 
@@ -131,7 +131,7 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Title *</Text>
             <View style={styles.inputRow}>
-              <Ionicons name="document-text-outline" size={18} color="#64748b" />
+              <MaterialIcons name="description" size={18} color="#64748b" />
               <TextInput
                 style={[styles.input, styles.inputFlex]}
                 placeholder="Enter task title"
@@ -146,7 +146,7 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           <View style={styles.formGroup}>
             <Text style={styles.label}>Description</Text>
             <View style={[styles.inputRow, styles.textAreaRow]}>
-              <Ionicons name="create-outline" size={18} color="#64748b" style={{ marginTop: 6 }} />
+              <MaterialIcons name="edit" size={18} color="#64748b" style={{ marginTop: 6 }} />
               <TextInput
                 style={[styles.input, styles.textArea, styles.inputFlex]}
                 placeholder="Enter task description (optional)"
@@ -166,7 +166,7 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
               onPress={() => setShowDatePicker(true)}
             >
               <View style={styles.dateRow}>
-                <Ionicons name="calendar-outline" size={18} color="#64748b" />
+                <MaterialIcons name="calendar-today" size={18} color="#64748b" />
                 <Text style={[styles.dateText, !dueDate && styles.placeholderText]}>
                   {dueDate ? dueDate.toLocaleDateString() : 'Select a due date'}
                 </Text>
@@ -207,7 +207,7 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           disabled={isSubmitting}
           activeOpacity={0.8}
         >
-          <Ionicons name="close" size={18} color="#495057" />
+          <MaterialIcons name="close" size={18} color="#495057" />
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
         
@@ -221,7 +221,7 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           disabled={!title.trim() || isSubmitting}
           activeOpacity={0.9}
         >
-          <Ionicons name={isEditMode ? 'save-outline' : 'add'} size={18} color="#fff" />
+          <MaterialIcons name={isEditMode ? 'save' : 'add'} size={18} color="#fff" />
           <Text style={styles.submitButtonText}>
             {isSubmitting 
               ? (isEditMode ? 'Updating...' : 'Adding...')

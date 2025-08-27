@@ -8,7 +8,7 @@ import { Task, toggleTaskCompletion, deleteTask } from '../../redux/slices/taskS
 import { repoUpdateTask, repoDeleteTask } from '../../storage/offlineRepo';
 
 import { format } from 'date-fns';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'TaskDetail'>;
 
@@ -39,7 +39,7 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
             style={styles.headerButton}
             onPress={handleEditPress}
           >
-            <Ionicons name="create-outline" size={22} color="#1c7ed6" />
+            <MaterialIcons name="edit" size={22} color="#1c7ed6" />
           </TouchableOpacity>
         ),
       });
@@ -116,9 +116,9 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
                 activeOpacity={0.7}
               >
                 {task.isCompleted ? (
-                  <Ionicons name="checkmark" size={18} color="#fff" />
+                  <MaterialIcons name="check" size={18} color="#fff" />
                 ) : (
-                  <Ionicons name="ellipse-outline" size={18} color="#bbb" />
+                  <MaterialIcons name="radio-button-unchecked" size={18} color="#bbb" />
                 )}
               </TouchableOpacity>
               <Text style={[styles.title, task.isCompleted && styles.completedTask]}>
@@ -128,14 +128,14 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
 
             <View style={styles.chipsRow}>
               <View style={[styles.chip, task.isCompleted ? styles.chipCompleted : styles.chipActive]}>
-                <Ionicons name={task.isCompleted ? 'checkmark-circle' : 'time-outline'} size={14} color={task.isCompleted ? '#2b8a3e' : '#1c7ed6'} />
+                <MaterialIcons name={task.isCompleted ? 'check-circle' : 'schedule'} size={14} color={task.isCompleted ? '#2b8a3e' : '#1c7ed6'} />
                 <Text style={[styles.chipText, task.isCompleted ? styles.chipTextCompleted : styles.chipTextActive]}>
                   {task.isCompleted ? 'Completed' : 'Active'}
                 </Text>
               </View>
               {task.dueDate && (
                 <View style={[styles.chip, styles.chipDate]}>
-                  <Ionicons name="calendar-outline" size={14} color="#1c7ed6" />
+                  <MaterialIcons name="calendar-today" size={14} color="#1c7ed6" />
                   <Text style={[styles.chipText, styles.chipTextActive]}>
                     {format(new Date(task.dueDate), 'MMM d, yyyy')}
                   </Text>
@@ -158,7 +158,7 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
               disabled={isLoading}
               activeOpacity={0.85}
             >
-              <Ionicons name="create-outline" size={18} color="#fff" />
+              <MaterialIcons name="edit" size={18} color="#fff" />
               <Text style={styles.actionButtonText}>Edit Task</Text>
             </TouchableOpacity>
             
@@ -168,7 +168,7 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
               disabled={isLoading}
               activeOpacity={0.85}
             >
-              <Ionicons name="trash-outline" size={18} color="#fff" />
+              <MaterialIcons name="delete" size={18} color="#fff" />
               <Text style={styles.actionButtonText}>Delete Task</Text>
             </TouchableOpacity>
           </View>

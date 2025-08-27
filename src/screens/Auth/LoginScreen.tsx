@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import Screen from '../../components/Screen';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -41,27 +42,33 @@ const LoginScreen = () => {
 
   return (
     <Screen>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Welcome Back</Text>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholderTextColor="#999"
-        />
+        <View style={styles.inputRow}>
+          <MaterialIcons name="mail-outline" size={18} color="#64748b" />
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholderTextColor="#999"
+          />
+        </View>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#999"
-        />
+        <View style={styles.inputRow}>
+          <MaterialIcons name="lock-outline" size={18} color="#64748b" />
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
+        </View>
         
         <TouchableOpacity 
           style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -71,7 +78,10 @@ const LoginScreen = () => {
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
+            <>
+              <MaterialIcons name="login" size={18} color="#fff" />
+              <Text style={styles.buttonText}>Sign In</Text>
+            </>
           )}
         </TouchableOpacity>
         
@@ -83,7 +93,7 @@ const LoginScreen = () => {
             <Text style={styles.footerLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </Screen>
   );
 };
@@ -126,6 +136,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f9f9f9',
+    marginBottom: 15,
+    height: 50,
+  },
+  inputFlex: {
+    flex: 1,
   },
   footer: {
     flexDirection: 'row',

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/RootNavigator';
 import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
-import { setTheme, toggleTheme, setNotificationsEnabled, setSyncOnCellular, resetSettings } from '../../redux/slices/settingsSlice';
+import { setTheme, setNotificationsEnabled, setSyncOnCellular, resetSettings } from '../../redux/slices/settingsSlice';
 import { logoutUser } from '../../redux/slices/authSlice';
 
 const SettingsScreen = () => {
@@ -94,7 +95,7 @@ const SettingsScreen = () => {
       disabled={showSwitch}
     >
       <View style={styles.settingIconContainer}>
-        {/* <Ionicons name={icon as any} size={22} color="#1c7ed6" /> */}
+        <MaterialIcons name={icon as any} size={22} color="#1c7ed6" />
       </View>
       <View style={styles.settingTextContainer}>
         <Text style={styles.settingTitle}>{title}</Text>
@@ -108,8 +109,7 @@ const SettingsScreen = () => {
           thumbColor={switchValue ? '#1c7ed6' : '#f8f9fa'}
         />
       ) : (
-        // <Ionicons name="chevron-forward" size={20} color="#adb5bd" />
-        <Text>COMPLETE</Text>
+        <MaterialIcons name="chevron-right" size={20} color="#adb5bd" />
       )}
     </TouchableOpacity>
   );
@@ -120,7 +120,7 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
           <SettingItem
-            icon="moon"
+            icon="dark_mode"
             title="Dark Mode"
             description="Enable dark theme"
             showSwitch
@@ -132,7 +132,7 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
           <SettingItem
-            icon="notifications"
+            icon="notifications-none"
             title="Enable Notifications"
             description="Receive task reminders and updates"
             showSwitch
@@ -161,12 +161,12 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           <SettingItem
-            icon="person"
+            icon="person-outline"
             title="Account Settings"
             description="Update your profile and preferences"
           />
           <SettingItem
-            icon="shield-checkmark"
+            icon="privacy-tip"
             title="Privacy"
             description="Manage your privacy settings"
           />
@@ -175,22 +175,22 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
           <SettingItem
-            icon="information-circle"
+            icon="info-outline"
             title="About TaskMaster"
             description="Version 1.0.0"
           />
           <SettingItem
-            icon="help-circle"
+            icon="help-outline"
             title="Help & Support"
             description="Get help with the app"
           />
           <SettingItem
-            icon="share-social"
+            icon="share"
             title="Share App"
             description="Tell your friends about TaskMaster"
           />
           <SettingItem
-            icon="thumbs-up"
+            icon="thumb-up-off-alt"
             title="Rate Us"
             description="Enjoying the app? Rate us!"
           />
@@ -207,7 +207,7 @@ const SettingsScreen = () => {
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          {/* <Ionicons name="log-out" size={20} color="#f03e3e" /> */}
+          <MaterialIcons name="logout" size={20} color="#f03e3e" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
 

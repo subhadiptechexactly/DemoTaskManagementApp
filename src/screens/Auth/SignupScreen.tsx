@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import Screen from '../../components/Screen';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -31,6 +32,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#f9f9f9',
   },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f9f9f9',
+    marginBottom: 15,
+    height: 50,
+  },
+  inputFlex: {
+    flex: 1,
+  },
   button: {
     backgroundColor: '#1c7ed6',
     padding: 15,
@@ -46,6 +62,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   footer: {
     flexDirection: 'row',
@@ -128,41 +150,53 @@ const SignupScreen = () => {
       >
         <Text style={styles.title}>Create Account</Text>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          value={name}
-          onChangeText={setName}
-          placeholderTextColor="#999"
-        />
+        <View style={styles.inputRow}>
+          <MaterialIcons name="person-outline" size={18} color="#64748b" />
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Full Name"
+            value={name}
+            onChangeText={setName}
+            placeholderTextColor="#999"
+          />
+        </View>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholderTextColor="#999"
-        />
+        <View style={styles.inputRow}>
+          <MaterialIcons name="mail-outline" size={18} color="#64748b" />
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholderTextColor="#999"
+          />
+        </View>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#999"
-        />
+        <View style={styles.inputRow}>
+          <MaterialIcons name="lock-outline" size={18} color="#64748b" />
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
+        </View>
         
-        <TextInput
-          style={[styles.input, { marginBottom: 20 }]}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          placeholderTextColor="#999"
-        />
+        <View style={[styles.inputRow, { marginBottom: 20 }]}> 
+          <MaterialIcons name="lock-outline" size={18} color="#64748b" />
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
+        </View>
         
         <TouchableOpacity 
           style={[styles.button, (isLoading || !name || !email || !password || !confirmPassword) && styles.buttonDisabled]} 
@@ -172,7 +206,10 @@ const SignupScreen = () => {
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Sign Up</Text>
+            <View style={styles.buttonContent}>
+              <MaterialIcons name="person-add" size={18} color="#fff" />
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </View>
           )}
         </TouchableOpacity>
         

@@ -7,7 +7,7 @@ import { AppStackParamList } from '../../navigation/AppStack';
 import { fetchTasksStart, fetchTasksSuccess, fetchTasksFailure, Task } from '../../redux/slices/taskSlice';
 import { getTasks, getCurrentUserId } from '../../firebase/config';
 import { getAllTasksLocal } from '../../storage/offlineRepo';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 
 // Define the navigation prop type
 type TaskListScreenNavigationProp = NativeStackNavigationProp<AppStackParamList, 'Tasks'>;
@@ -116,9 +116,9 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
     >
       <View style={[styles.checkbox, item.isCompleted && styles.checkboxCompleted]}>
         {item.isCompleted ? (
-          <Ionicons name="checkmark" size={18} color="#fff" />
+          <MaterialIcons name="check" size={18} color="#fff" />
         ) : (
-          <Ionicons name="ellipse-outline" size={18} color="#bbb" />
+          <MaterialIcons name="radio-button-unchecked" size={18} color="#bbb" />
         )}
       </View>
 
@@ -140,14 +140,14 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
         {!!item.dueDate && (
           <View style={styles.badgeRow}>
             <View style={styles.badge}>
-              <Ionicons name="calendar-outline" size={12} color="#1c7ed6" />
+              <MaterialIcons name="calendar-today" size={12} color="#1c7ed6" />
               <Text style={styles.badgeText}>{new Date(item.dueDate).toLocaleDateString()}</Text>
             </View>
           </View>
         )}
       </View>
 
-      <Ionicons name="chevron-forward" size={18} color="#ccc" />
+      <MaterialIcons name="chevron-right" size={18} color="#ccc" />
     </TouchableOpacity>
   );
 
@@ -168,7 +168,7 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
             <Text style={styles.headerSubtitle}>{tasks.length} total</Text>
           </View>
           <TouchableOpacity style={styles.refreshBtn} onPress={handleRefresh}>
-            <Ionicons name="refresh" size={18} color="#1c7ed6" />
+            <MaterialIcons name="refresh" size={18} color="#1c7ed6" />
             <Text style={styles.refreshText}>Refresh</Text>
           </TouchableOpacity>
         </View>
@@ -195,7 +195,7 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
           onRefresh={handleRefresh}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="checkmark-done" size={48} color="#ddd" />
+              <MaterialIcons name="done-all" size={48} color="#ddd" />
               <Text style={styles.emptyStateText}>No tasks yet</Text>
               <Text style={styles.emptyStateSubtext}>Tap + to add a new task</Text>
             </View>
@@ -206,7 +206,7 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
           style={styles.addButton}
           onPress={() => navigation.navigate('AddTask', {})}
         >
-          <Ionicons name="add" size={28} color="#fff" />
+          <MaterialIcons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
     </Screen>

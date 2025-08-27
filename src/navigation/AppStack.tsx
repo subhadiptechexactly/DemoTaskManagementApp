@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import { RootState } from '../redux/store';
 import { useSelector } from 'react-redux';
 import TaskListScreen from '../screens/Tasks/TaskListScreen';
@@ -42,18 +42,9 @@ const AppStack = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string;
-
-          if (route.name === 'Tasks') {
-            iconName = focused ? 'list' : 'list-outline';
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'settings' : 'settings-outline';
-          } else {
-            iconName = 'list';
-          }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
+        tabBarIcon: ({ color, size }) => {
+          const iconName = route.name === 'Tasks' ? 'format-list-bulleted' : 'settings';
+          return <MaterialIcons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: isDark ? '#4dabf7' : '#1c7ed6',
         tabBarInactiveTintColor: isDark ? '#868e96' : '#495057',
