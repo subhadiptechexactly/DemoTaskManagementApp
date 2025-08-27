@@ -5,7 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask, updateTask, Task } from '../../redux/slices/taskSlice';
-import { addTask as fbAddTask, updateTask as fbUpdateTask } from '../../firebase/config';
+import { getCurrentUserId } from '../../firebase/config';
+import { repoAddTask, repoUpdateTask } from '../../storage/offlineRepo';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -73,48 +74,43 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           userId: existingTask.userId,
         };
         dispatch(updateTask(optimistic));
-        // Persist to Firestore
-        const { error } = await fbUpdateTask(existingTask.id, {
+        // Fire-and-forget persistence (works offline via queue)
+        repoUpdateTask(existingTask.id, {
           title: optimistic.title,
-          description: optimistic.description || null,
-          dueDate: optimistic.dueDate ? new Date(optimistic.dueDate) : null,
-        });
-        if (error) throw new Error(error);
+          description: optimistic.description,
+          dueDate: dueDate ?? null,
+        }).catch(() => {});
+        // Navigate back immediately
+        navigation.goBack();
+        return;
       } else {
-        // Optimistic add in Redux (temporary id)
-        const tempId = `tmp-${Date.now()}`;
+        const uid = getCurrentUserId() || 'local';
         const optimistic: Task = {
-          id: tempId,
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           title: title.trim(),
           description: description.trim() || undefined,
           dueDate: dueDate ? dueDate.toISOString() : undefined,
           isCompleted: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          userId: 'me',
+          userId: uid,
         };
+        // Optimistic Redux add
         dispatch(addTask(optimistic));
-        // Persist to Firestore
-        const { error } = await fbAddTask({
+        // Persist via offline repo (will queue if offline) - fire-and-forget
+        repoAddTask({
+          id: optimistic.id,
           title: optimistic.title,
-          description: optimistic.description || null,
-          dueDate: optimistic.dueDate ? new Date(optimistic.dueDate) : null,
+          description: optimistic.description,
+          dueDate: dueDate ?? null,
           isCompleted: false,
-        });
-        if (error) throw new Error(error);
+          userId: uid,
+        }).catch(() => {});
+        // Navigate back immediately
+        navigation.goBack();
+        return;
       }
       
-      // Show success message
-      Alert.alert(
-        'Success',
-        isEditMode ? 'Task updated successfully!' : 'Task added successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
     } catch (error) {
       console.error('Error saving task:', error);
       Alert.alert('Error', 'Failed to save task. Please try again.');

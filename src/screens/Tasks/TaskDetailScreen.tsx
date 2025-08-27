@@ -6,6 +6,7 @@ import { AppStackParamList } from '../../navigation/AppStack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Task, toggleTaskCompletion, deleteTask } from '../../redux/slices/taskSlice';
 import { updateTask as fbUpdateTask, deleteTask as fbDeleteTask } from '../../firebase/config';
+import { repoUpdateTask, repoDeleteTask } from '../../storage/offlineRepo';
 
 import { format } from 'date-fns';
 
@@ -58,13 +59,10 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
   const handleToggleComplete = async () => {
     try {
       setIsLoading(true);
-      // Dispatch the toggle action
+      // Optimistic Redux toggle
       dispatch(toggleTaskCompletion(taskId));
-      // Persist to Firestore
-      const { error } = await fbUpdateTask(taskId, {
-        isCompleted: !task?.isCompleted,
-      });
-      if (error) throw new Error(error);
+      // Persist via offline repo (queues if offline)
+      await repoUpdateTask(taskId, { isCompleted: !task?.isCompleted });
     } catch (error) {
       Alert.alert('Error', 'Failed to update task status');
     } finally {
@@ -86,11 +84,10 @@ const TaskDetailScreen = ({ route, navigation }: Props) => {
           onPress: async () => {
             try {
               setIsLoading(true);
-              // Dispatch the delete action
+              // Optimistic Redux delete
               dispatch(deleteTask(taskId));
-              // Persist to Firestore
-              const { error } = await fbDeleteTask(taskId);
-              if (error) throw new Error(error);
+              // Persist via offline repo (queues if offline)
+              await repoDeleteTask(taskId);
               navigation.goBack();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete task');

@@ -5,7 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
 import { fetchTasksStart, fetchTasksSuccess, fetchTasksFailure, Task } from '../../redux/slices/taskSlice';
-import { getTasks } from '../../firebase/config';
+import { getTasks, getCurrentUserId } from '../../firebase/config';
+import { getAllTasksLocal } from '../../storage/offlineRepo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Define the navigation prop type
@@ -22,10 +23,49 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
 
   const loadTasks = useCallback(async () => {
     dispatch(fetchTasksStart());
+    const uid = getCurrentUserId();
+    // Always seed from local Realm first so offline creations are visible
+    try {
+      const local = await getAllTasksLocal();
+      const localTasks: Task[] = local.map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        isCompleted: !!t.isCompleted,
+        dueDate: t.dueDate,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        userId: t.userId,
+      }));
+      dispatch(fetchTasksSuccess(localTasks));
+    } catch (e) {
+      // ignore local load errors here
+    }
+    // If not authenticated, load from local Realm and exit
+    if (!uid) {
+      try {
+        const local = await getAllTasksLocal();
+        const localTasks: Task[] = local.map((t: any) => ({
+          id: t.id,
+          title: t.title,
+          description: t.description,
+          isCompleted: !!t.isCompleted,
+          dueDate: t.dueDate,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt,
+          userId: t.userId,
+        }));
+        dispatch(fetchTasksSuccess(localTasks));
+      } catch (e) {
+        dispatch(fetchTasksFailure('Failed to load local tasks'));
+      }
+      setRefreshing(false);
+      return () => {};
+    }
     // Set up Firestore subscription
     const unsubscribe = getTasks((rawTasks) => {
       try {
-        const tasks: Task[] = rawTasks.map((t: any) => ({
+        const remoteTasks: Task[] = rawTasks.map((t: any) => ({
           id: t.id,
           title: t.title,
           description: t.description,
@@ -37,7 +77,7 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
           updatedAt: t.updatedAt?.toDate ? t.updatedAt.toDate().toISOString() : (t.updatedAt || new Date().toISOString()),
           userId: t.userId,
         }));
-        dispatch(fetchTasksSuccess(tasks));
+        dispatch(fetchTasksSuccess(remoteTasks));
       } catch (e) {
         dispatch(fetchTasksFailure('Failed to parse tasks'));
       }

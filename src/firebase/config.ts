@@ -13,6 +13,32 @@ const firebaseConfig = {
   databaseURL: "https://taskmanagementapp-95a3c-default-rtdb.firebaseio.com"
 };
 
+// Create a task with a known id so local and remote can stay in sync
+export const addTaskWithId = async (taskId: string, task: any) => {
+  try {
+    const user = auth().currentUser;
+    if (!user) throw new Error('User not authenticated');
+
+    await firestore()
+      .collection('users')
+      .doc(user.uid)
+      .collection('tasks')
+      .doc(taskId)
+      .set({
+        ...task,
+        userId: user.uid,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+    return { success: true, error: null };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const getCurrentUserId = () => auth().currentUser?.uid || null;
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
