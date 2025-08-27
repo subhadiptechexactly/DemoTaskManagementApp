@@ -6,40 +6,45 @@
  */
 
 import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import React, { useEffect } from 'react';
+import { StatusBar, LogBox } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider as ReduxProvider } from 'react-redux';
+import { store } from './src/redux/store';
+import RootNavigator from './src/navigation/RootNavigator';
+import { ThemeProvider } from './src/theme/ThemeContext';
+import { initFirebase } from './src/firebase/config';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+// Ignore specific warnings
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+  'AsyncStorage has been extracted from react-native core',
+]);
+
+const App = () => {
+  useEffect(() => {
+    // Initialize Firebase
+    initFirebase();
+    
+    // Set up any app-wide listeners or subscriptions here
+    return () => {
+      // Clean up any subscriptions
+    };
+  }, []);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <ReduxProvider store={store}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+            <RootNavigator />
+          </GestureHandlerRootView>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ReduxProvider>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+};
 
 export default App;
