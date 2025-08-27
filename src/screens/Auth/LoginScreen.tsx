@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootNavigator';
-import { loginStart, loginSuccess, loginFailure } from '../../redux/slices/authSlice';
+import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
+import { loginUser } from '../../redux/slices/authSlice';
 
-type LoginScreenNavigationProp = NativeStackScreenProps<RootStackParamList, 'Auth'>;
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
 
-const LoginScreen = ({ navigation }: LoginScreenNavigationProp) => {
+const LoginScreen = () => {
+  const navigation = useNavigation<LoginScreenNavigationProp>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
-  const { isLoading, error } = useSelector((state: any) => state.auth);
+  const dispatch = useAppDispatch();
+  const { isLoading, error, isAuthenticated } = useAppSelector((state: RootState) => state.auth);
+
+  // Handle navigation after successful login
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigation.navigate('App');
+    }
+  }, [isAuthenticated, navigation]);
+
+  // Show error alerts
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error);
+    }
+  }, [error]);
 
   const handleLogin = () => {
     if (!email || !password) {
@@ -19,23 +35,13 @@ const LoginScreen = ({ navigation }: LoginScreenNavigationProp) => {
       return;
     }
 
-    dispatch(loginStart());
-    // TODO: Replace with actual Firebase authentication
-    setTimeout(() => {
-      // Mock successful login
-      dispatch(loginSuccess({
-        uid: 'mock-user-id',
-        email,
-        displayName: email.split('@')[0],
-      }));
-    }, 1000);
+    dispatch(loginUser({ email, password }));
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back</Text>
       
-      {error && <Text style={styles.errorText}>{error}</Text>}
       
       <TextInput
         style={styles.input}
@@ -68,7 +74,9 @@ const LoginScreen = ({ navigation }: LoginScreenNavigationProp) => {
       
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Auth', { screen: 'Signup' } as any)}>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('Auth', { screen: 'Signup' } as any)}
+        >
           <Text style={styles.footerLink}>Sign Up</Text>
         </TouchableOpacity>
       </View>
@@ -126,6 +134,7 @@ const styles = StyleSheet.create({
   footerLink: {
     color: '#1c7ed6',
     fontWeight: '600',
+    marginLeft: 4,
   },
   errorText: {
     color: '#ff6b6b',

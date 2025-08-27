@@ -1,9 +1,64 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootNavigator';
+import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
+import { registerUser } from '../../redux/slices/authSlice';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    backgroundColor: '#f9f9f9',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    textAlign: 'center',
+    color: '#333',
+  },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  button: {
+    backgroundColor: '#1c7ed6',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    color: '#666',
+  },
+  footerLink: {
+    color: '#1c7ed6',
+    fontWeight: '600',
+  },
+});
 
 type SignupScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
 
@@ -14,8 +69,26 @@ const SignupScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector((state: RootState) => state.auth);
+  
+  // Handle navigation after successful registration
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigation.navigate('App');
+    }
+  }, [isAuthenticated, navigation]);
 
-  const handleSignup = () => {
+  // Show error alerts
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error);
+      setError(null); // Clear error after showing
+    }
+  }, [error]);
+
+  const handleSignup = async () => {
     if (!email || !password || !confirmPassword || !name) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -26,15 +99,23 @@ const SignupScreen = () => {
       return;
     }
 
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password should be at least 6 characters');
+      return;
+    }
+
     setIsLoading(true);
-    
-    // TODO: Replace with actual Firebase authentication
-    setTimeout(() => {
+    try {
+      const result = await dispatch(registerUser({ email, password, name })).unwrap();
+      if (!result) {
+        setError('Registration failed. Please try again.');
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during registration';
+      setError(errorMessage);
+    } finally {
       setIsLoading(false);
-      Alert.alert('Success', 'Account created successfully!', [
-        { text: 'OK', onPress: () => navigation.navigate('App') }
-      ]);
-    }, 1500);
+    }
   };
 
   return (
@@ -78,13 +159,15 @@ const SignupScreen = () => {
       />
       
       <TouchableOpacity 
-        style={[styles.button, isLoading && styles.buttonDisabled]}
-        onPress={handleSignup}
+        style={[styles.button, isLoading && styles.buttonDisabled]} 
+        onPress={handleSignup} 
         disabled={isLoading}
       >
-        <Text style={styles.buttonText}>
-          {isLoading ? 'Creating Account...' : 'Sign Up'}
-        </Text>
+        {isLoading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Sign Up</Text>
+        )}
       </TouchableOpacity>
       
       <View style={styles.footer}>
@@ -97,57 +180,5 @@ const SignupScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-    color: '#333',
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  button: {
-    backgroundColor: '#1c7ed6',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    backgroundColor: '#a5d8ff',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  footerText: {
-    color: '#666',
-  },
-  footerLink: {
-    color: '#1c7ed6',
-    fontWeight: '600',
-  },
-});
 
 export default SignupScreen;

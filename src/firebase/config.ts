@@ -2,16 +2,15 @@ import { initializeApp } from '@react-native-firebase/app';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
-// Your web app's Firebase configuration
+// Firebase configuration from google-services.json
 const firebaseConfig = {
-  // Replace these with your actual Firebase config
-  // You can find these in your Firebase Console > Project Settings > General > Your apps
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAVTWUC45n50Y8lyGozdtvaka5EgUX2_TY",
+  authDomain: "taskmanagementapp-95a3c.firebaseapp.com",
+  projectId: "taskmanagementapp-95a3c",
+  storageBucket: "taskmanagementapp-95a3c.firebasestorage.app",
+  messagingSenderId: "1015470159829",
+  appId: "1:1015470159829:android:05e15b9b76ff4ca9496f5c",
+  databaseURL: "https://taskmanagementapp-95a3c-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase

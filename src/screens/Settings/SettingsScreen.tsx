@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-// import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/RootNavigator';
+import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
 import { setTheme, toggleTheme, setNotificationsEnabled, setSyncOnCellular, resetSettings } from '../../redux/slices/settingsSlice';
-import { logout } from '../../redux/slices/authSlice';
+import { logoutUser } from '../../redux/slices/authSlice';
 
 const SettingsScreen = () => {
-  const dispatch = useDispatch();
-  const { theme, notificationsEnabled, syncOnCellular } = useSelector((state: any) => state.settings);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const dispatch = useAppDispatch();
+  const { theme, notificationsEnabled, syncOnCellular } = useAppSelector((state: RootState) => state.settings);
   const [isDarkMode, setIsDarkMode] = useState(theme === 'dark');
 
   const handleThemeToggle = () => {
@@ -48,11 +50,19 @@ const SettingsScreen = () => {
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
+        { 
+          text: 'Logout', 
           style: 'destructive',
-          onPress: () => {
-            dispatch(logout());
+          onPress: async () => {
+            try {
+              await dispatch(logoutUser()).unwrap();
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Auth' }],
+              });
+            } catch (error) {
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
           },
         },
       ]
@@ -197,7 +207,7 @@ const SettingsScreen = () => {
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out" size={20} color="#f03e3e" />
+          {/* <Ionicons name="log-out" size={20} color="#f03e3e" /> */}
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
 
