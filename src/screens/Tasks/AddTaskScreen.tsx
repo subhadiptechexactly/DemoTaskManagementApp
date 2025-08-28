@@ -9,6 +9,7 @@ import { getCurrentUserId } from '../../firebase/config';
 import { repoAddTask, repoUpdateTask } from '../../storage/offlineRepo';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
+import notifee, { AndroidImportance, TimestampTrigger, TriggerType } from '@notifee/react-native';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
@@ -25,7 +26,9 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [dueTime, setDueTime] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dispatch = useDispatch();
@@ -50,6 +53,60 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setDueDate(selectedDate);
+      // Reset time when date changes
+      if (!dueTime) {
+        setDueTime(new Date());
+      }
+    }
+  };
+
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      setDueTime(selectedTime);
+    }
+  };
+
+  const scheduleTaskNotification = async (taskId: string, title: string, date: Date | null, time: Date | null) => {
+    try {
+      if (!date || !time) return;
+      // Build a single Date with selected date + time (local time)
+      const scheduled = new Date(date);
+      scheduled.setHours(time.getHours(), time.getMinutes(), 0, 0);
+      if (scheduled.getTime() <= Date.now()) return; // don't schedule past notifications
+
+      // Android 13+ requires notification permission
+      await notifee.requestPermission();
+
+      // Ensure channel exists (Android)
+      await notifee.createChannel({
+        id: 'tasks',
+        name: 'Task Reminders',
+        importance: AndroidImportance.HIGH,
+      });
+
+      const trigger: TimestampTrigger = {
+        type: TriggerType.TIMESTAMP,
+        timestamp: scheduled.getTime(),
+        alarmManager: { allowWhileIdle: true },
+      };
+
+      await notifee.createTriggerNotification(
+        {
+          id: `task-${taskId}`,
+          title: 'Task Reminder',
+          body: title,
+          android: {
+            channelId: 'tasks',
+            smallIcon: 'ic_launcher',
+            pressAction: { id: 'default' },
+          },
+        },
+        trigger,
+      );
+    } catch (e) {
+      // Non-fatal: log but don't block task creation
+      console.warn('Failed to schedule notification:', e);
     }
   };
 
@@ -107,6 +164,8 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           isCompleted: false,
           userId: uid,
         }).catch(() => {});
+        // Schedule local notification if date and time provided
+        await scheduleTaskNotification(optimistic.id, optimistic.title, dueDate, dueTime);
         // Navigate back immediately
         navigation.goBack();
         return;
@@ -197,6 +256,46 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
               </TouchableOpacity>
             )}
           </View>
+
+          {dueDate && (
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Reminder Time (Optional)</Text>
+              <TouchableOpacity 
+                style={styles.dateInput}
+                onPress={() => setShowTimePicker(true)}
+              >
+                <View style={styles.dateRow}>
+                  <MaterialIcons name="access-time" size={18} color="#64748b" />
+                  <Text style={[styles.dateText, !dueTime && styles.placeholderText]}>
+                    {dueTime ? dueTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select a time'}
+                  </Text>
+                </View>
+                {!!dueTime && (
+                  <View style={styles.dateBadge}>
+                    <Text style={styles.dateBadgeText}>Set</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              {showTimePicker && (
+                <DateTimePicker
+                  value={dueTime || new Date()}
+                  mode="time"
+                  display="default"
+                  onChange={handleTimeChange}
+                />
+              )}
+
+              {dueTime && (
+                <TouchableOpacity 
+                  style={styles.clearDateButton}
+                  onPress={() => setDueTime(null)}
+                >
+                  <Text style={styles.clearDateText}>Clear time</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </ScrollView>
       </Screen>
 
