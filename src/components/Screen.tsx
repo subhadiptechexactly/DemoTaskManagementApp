@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { StatusBar, StatusBarStyle, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../theme/ThemeContext';
 
 type ScreenProps = {
   children: ReactNode;
@@ -12,19 +13,24 @@ type ScreenProps = {
 
 const Screen = ({
   children,
-  barStyle = 'dark-content',
-  backgroundColor = '#fff',
-  statusBarColor = '#fff',
+  barStyle,
+  backgroundColor,
+  statusBarColor,
   barTranslucent = false,
 }: ScreenProps) => {
+  const { theme, isDark } = useTheme();
+  const resolvedBarStyle: StatusBarStyle = barStyle ?? (isDark ? 'light-content' : 'dark-content');
+  const resolvedBg = backgroundColor ?? theme.colors.background;
+  const resolvedStatusBar = statusBarColor ?? theme.colors.background;
+
   return (
     <>
       <StatusBar
-        barStyle={barStyle}
-        backgroundColor={statusBarColor}
+        barStyle={resolvedBarStyle}
+        backgroundColor={resolvedStatusBar}
         translucent={barTranslucent}
       />
-      <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top', 'left', 'right', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: resolvedBg }]} edges={['top', 'left', 'right', 'bottom']}>
         {children}
       </SafeAreaView>
     </>

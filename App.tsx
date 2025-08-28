@@ -11,7 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './src/redux/store';
 import RootNavigator from './src/navigation/RootNavigator';
-import { ThemeProvider } from './src/theme/ThemeContext';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { initFirebase } from './src/firebase/config';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/contexts/AuthContext';
@@ -54,13 +54,23 @@ const App = () => {
         <SafeAreaProvider>
           <ThemeProvider>
             <AuthProvider>
-              <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+              <ThemedStatusBar />
               <RootNavigator />
             </AuthProvider>
           </ThemeProvider>
         </SafeAreaProvider>
       </ReduxProvider>
     </GestureHandlerRootView>
+  );
+};
+
+const ThemedStatusBar = () => {
+  const { theme, isDark } = useTheme();
+  return (
+    <StatusBar
+      barStyle={isDark ? 'light-content' : 'dark-content'}
+      backgroundColor={theme.colors.background}
+    />
   );
 };
 

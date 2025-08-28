@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 import AuthStack from './AuthStack';
 import AppStack from './AppStack';
+import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
   Auth: undefined;
@@ -21,13 +22,14 @@ const LoadingScreen = () => (
 
 const RootNavigator = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { theme } = useTheme();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={theme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <Stack.Screen name="App" component={AppStack} />

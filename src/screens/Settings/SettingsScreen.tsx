@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert } f
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/RootNavigator';
+import Screen from '../../components/Screen';
 import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
 import { setTheme, setNotificationsEnabled, setSyncOnCellular, resetSettings } from '../../redux/slices/settingsSlice';
 import { logoutUser } from '../../redux/slices/authSlice';
@@ -115,7 +116,7 @@ const SettingsScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <Screen>
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
@@ -216,7 +217,7 @@ const SettingsScreen = () => {
           <Text style={styles.copyrightText}>© 2023 TaskMaster. All rights reserved.</Text>
         </View>
       </ScrollView>
-    </View>
+    </Screen>
   );
 };
 
