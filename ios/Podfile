@@ -8,23 +8,30 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# ❌ REMOVE this line (it breaks gRPC)
+# use_modular_headers!
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
+else
+  # ✅ Default to static linking (works best with RN + gRPC)
+  use_frameworks! :linkage => :static
 end
 
 target 'AwesomeProject' do
   config = use_native_modules!
-
-  # Add RNWorklets pod
-  pod 'RNWorklets', :path => '../node_modules/react-native-worklets-core/ios'
 
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
+  # ✅ Explicitly fix gRPC headers
+  pod 'gRPC-C++', :modular_headers => false
+  pod 'gRPC-Core', :modular_headers => false
 
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
@@ -34,5 +41,13 @@ target 'AwesomeProject' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Workaround: allow non-modular includes in framework modules to avoid
+    # 'non-modular-include-in-framework-module' errors (e.g., with RN/Firebase).
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
+    end
   end
 end
