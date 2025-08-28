@@ -13,54 +13,77 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#f6f7fb',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-    color: '#333',
+    fontSize: 30,
+    fontWeight: '800',
+    marginBottom: 6,
+    textAlign: 'left',
+    color: '#0f172a',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 18,
+  },
+  headerWrap: {
+    marginBottom: 8,
   },
   input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    height: 48,
+    borderWidth: 0,
     borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    paddingHorizontal: 12,
+    marginBottom: 0,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'transparent',
+  },
+  label: {
+    fontSize: 13,
+    color: '#334155',
+    marginBottom: 6,
+    fontWeight: '600',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: '#e5e7eb',
+    borderRadius: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
-    marginBottom: 15,
-    height: 50,
+    backgroundColor: '#f8fafc',
+    marginBottom: 14,
+    height: 48,
   },
   inputFlex: {
     flex: 1,
   },
   button: {
-    backgroundColor: '#1c7ed6',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: '#2563eb',
+    paddingVertical: 14,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 16,
   },
   buttonDisabled: {
-    backgroundColor: '#a5d8ff',
+    backgroundColor: '#93c5fd',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
     textAlign: 'center',
   },
   buttonContent: {
@@ -68,6 +91,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  errorText: {
+    color: '#ef4444',
+    marginBottom: 8,
+    textAlign: 'left',
   },
   footer: {
     flexDirection: 'row',
@@ -78,8 +106,8 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   footerLink: {
-    color: '#1c7ed6',
-    fontWeight: '600',
+    color: '#2563eb',
+    fontWeight: '700',
   },
 });
 
@@ -90,6 +118,8 @@ const SignupScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,80 +173,97 @@ const SignupScreen = () => {
 
   return (
     <Screen>
-      <ScrollView 
-        contentContainerStyle={styles.container} 
+      <ScrollView
+        contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Create Account</Text>
-        
-        <View style={styles.inputRow}>
-          <MaterialIcons name="person-outline" size={18} color="#64748b" />
-          <TextInput
-            style={[styles.input, styles.inputFlex]}
-            placeholder="Full Name"
-            value={name}
-            onChangeText={setName}
-            placeholderTextColor="#999"
-          />
+        <View style={styles.headerWrap}>
+          <Text style={styles.title}>Create account</Text>
+          <Text style={styles.subtitle}>Sign up to get started with your tasks</Text>
         </View>
-        
-        <View style={styles.inputRow}>
-          <MaterialIcons name="mail-outline" size={18} color="#64748b" />
-          <TextInput
-            style={[styles.input, styles.inputFlex]}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholderTextColor="#999"
-          />
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Full name</Text>
+          <View style={styles.inputRow}>
+            <MaterialIcons name="person-outline" size={20} color="#64748b" />
+            <TextInput
+              style={[styles.input, styles.inputFlex]}
+              placeholder="John Doe"
+              value={name}
+              onChangeText={setName}
+              placeholderTextColor="#9aa4b2"
+            />
+          </View>
+
+          <Text style={[styles.label, { marginTop: 10 }]}>Email</Text>
+          <View style={styles.inputRow}>
+            <MaterialIcons name="mail-outline" size={20} color="#64748b" />
+            <TextInput
+              style={[styles.input, styles.inputFlex]}
+              placeholder="you@example.com"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholderTextColor="#9aa4b2"
+            />
+          </View>
+
+          <Text style={[styles.label, { marginTop: 10 }]}>Password</Text>
+          <View style={styles.inputRow}>
+            <MaterialIcons name="lock-outline" size={20} color="#64748b" />
+            <TextInput
+              style={[styles.input, styles.inputFlex]}
+              placeholder="Create a password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholderTextColor="#9aa4b2"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(p => !p)}>
+              <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={20} color="#64748b" />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={[styles.label, { marginTop: 10 }]}>Confirm password</Text>
+          <View style={[styles.inputRow, { marginBottom: 6 }]}>
+            <MaterialIcons name="lock-outline" size={20} color="#64748b" />
+            <TextInput
+              style={[styles.input, styles.inputFlex]}
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirm}
+              placeholderTextColor="#9aa4b2"
+            />
+            <TouchableOpacity onPress={() => setShowConfirm(p => !p)}>
+              <MaterialIcons name={showConfirm ? 'visibility-off' : 'visibility'} size={20} color="#64748b" />
+            </TouchableOpacity>
+          </View>
+
+          {!!error && <Text style={styles.errorText}>{error}</Text>}
+
+          <TouchableOpacity
+            style={[styles.button, (isLoading || !name || !email || !password || !confirmPassword) && styles.buttonDisabled]}
+            onPress={handleSignup}
+            disabled={isLoading || !name || !email || !password || !confirmPassword}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <View style={styles.buttonContent}>
+                <MaterialIcons name="person-add" size={20} color="#fff" />
+                <Text style={styles.buttonText}>Sign Up</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
-        
-        <View style={styles.inputRow}>
-          <MaterialIcons name="lock-outline" size={18} color="#64748b" />
-          <TextInput
-            style={[styles.input, styles.inputFlex]}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#999"
-          />
-        </View>
-        
-        <View style={[styles.inputRow, { marginBottom: 20 }]}> 
-          <MaterialIcons name="lock-outline" size={18} color="#64748b" />
-          <TextInput
-            style={[styles.input, styles.inputFlex]}
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            placeholderTextColor="#999"
-          />
-        </View>
-        
-        <TouchableOpacity 
-          style={[styles.button, (isLoading || !name || !email || !password || !confirmPassword) && styles.buttonDisabled]} 
-          onPress={handleSignup} 
-          disabled={isLoading || !name || !email || !password || !confirmPassword}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <View style={styles.buttonContent}>
-              <MaterialIcons name="person-add" size={18} color="#fff" />
-              <Text style={styles.buttonText}>Sign Up</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        
+
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account? </Text>
+          <Text style={styles.footerText}>Already have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Auth', { screen: 'Login' } as any)}>
-            <Text style={styles.footerLink}>Sign In</Text>
+            <Text style={styles.footerLink}> Sign In</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
