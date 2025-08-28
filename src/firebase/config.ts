@@ -1,17 +1,10 @@
-import { initializeApp } from '@react-native-firebase/app';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
-// Firebase configuration from google-services.json
-const firebaseConfig = {
-  apiKey: "AIzaSyAVTWUC45n50Y8lyGozdtvaka5EgUX2_TY",
-  authDomain: "taskmanagementapp-95a3c.firebaseapp.com",
-  projectId: "taskmanagementapp-95a3c",
-  storageBucket: "taskmanagementapp-95a3c.firebasestorage.app",
-  messagingSenderId: "1015470159829",
-  appId: "1:1015470159829:android:05e15b9b76ff4ca9496f5c",
-  databaseURL: "https://taskmanagementapp-95a3c-default-rtdb.firebaseio.com"
-};
+// NOTE: Do not initialize Firebase in JS.
+// React Native Firebase auto-initializes from native config:
+// - iOS: ios/GoogleService-Info.plist
+// - Android: android/app/google-services.json
 
 // Create a task with a known id so local and remote can stay in sync
 export const addTaskWithId = async (taskId: string, task: any) => {
@@ -39,18 +32,11 @@ export const addTaskWithId = async (taskId: string, task: any) => {
 
 export const getCurrentUserId = () => auth().currentUser?.uid || null;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-export { app, auth, firestore };
+// Module exports
+export { auth, firestore };
 
 export const initFirebase = async () => {
   try {
-    // Initialize Firebase if not already initialized
-    if (!app) {
-      initializeApp(firebaseConfig);
-    }
-    
     // Enable offline persistence
     await firestore().settings({
       persistence: true,

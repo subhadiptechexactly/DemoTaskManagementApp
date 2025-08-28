@@ -12,7 +12,6 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './src/redux/store';
 import RootNavigator from './src/navigation/RootNavigator';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
-import { initFirebase } from './src/firebase/config';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ensureRealm, processQueue } from './src/storage/offlineRepo';
@@ -25,8 +24,6 @@ LogBox.ignoreLogs([
 
 const App = () => {
   useEffect(() => {
-    // Initialize Firebase
-    initFirebase();
     // Open Realm and process any pending offline operations
     (async () => {
       try {
