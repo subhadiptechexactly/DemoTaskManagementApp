@@ -21,9 +21,9 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
   const { notification } = detail;
   
   if (type === EventType.PRESS) {
-    // Handle notification press in background
     console.log('Notification pressed in background:', notification);
   }
+  return Promise.resolve();
 });
 
 // Initialize notification channels
@@ -35,8 +35,9 @@ async function initializeNotifications() {
       name: 'Default Channel',
       importance: AndroidImportance.HIGH,
       sound: 'default',
+      vibration: true,
     });
-    
+
     await notifee.createChannel({
       id: 'messages',
       name: 'Messages',
@@ -44,10 +45,12 @@ async function initializeNotifications() {
       sound: 'default',
       vibration: true,
     });
-    
+
+    // Request permissions (for iOS)
+    await notifee.requestPermission();
     console.log('Notification channels initialized');
   } catch (error) {
-    console.error('Failed to initialize notification channels:', error);
+    console.error('Error initializing notifications:', error);
   }
 }
 
