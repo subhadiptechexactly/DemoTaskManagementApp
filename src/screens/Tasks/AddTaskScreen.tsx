@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Button } from 'react-native';
 import Screen from '../../components/Screen';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
@@ -9,7 +9,7 @@ import { getCurrentUserId } from '../../firebase/config';
 import { repoAddTask, repoUpdateTask } from '../../storage/offlineRepo';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
-import notifee, { AndroidImportance, TimestampTrigger, TriggerType } from '@notifee/react-native';
+import { scheduleTaskReminder, cancelTaskReminder, showImmediate, testScheduledNotification, listPendingNotifications } from '../../notifications/NotificationService';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
@@ -69,44 +69,20 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
 
   const scheduleTaskNotification = async (taskId: string, title: string, date: Date | null, time: Date | null) => {
     try {
+      // Mirror existing validation and logs, then delegate to service
       if (!date || !time) return;
-      // Build a single Date with selected date + time (local time)
       const scheduled = new Date(date);
       scheduled.setHours(time.getHours(), time.getMinutes(), 0, 0);
-      if (scheduled.getTime() <= Date.now()) return; // don't schedule past notifications
-
-      // Android 13+ requires notification permission
-      await notifee.requestPermission();
-
-      // Ensure channel exists (Android)
-      await notifee.createChannel({
-        id: 'tasks',
-        name: 'Task Reminders',
-        importance: AndroidImportance.HIGH,
-      });
-
-      const trigger: TimestampTrigger = {
-        type: TriggerType.TIMESTAMP,
-        timestamp: scheduled.getTime(),
-        alarmManager: { allowWhileIdle: true },
-      };
-
-      await notifee.createTriggerNotification(
-        {
-          id: `task-${taskId}`,
-          title: 'Task Reminder',
-          body: title,
-          android: {
-            channelId: 'tasks',
-            smallIcon: 'ic_launcher',
-            pressAction: { id: 'default' },
-          },
-        },
-        trigger,
-      );
+      const now = Date.now();
+      console.log('Scheduling task notification for:', scheduled.toString(), 'now:', new Date(now).toString());
+      if (scheduled.getTime() <= now + 2000) {
+        Alert.alert('Time in past or too soon', 'Please choose a time at least a few seconds in the future.');
+        return;
+      }
+      await scheduleTaskReminder(taskId, title, date, time);
     } catch (e) {
-      // Non-fatal: log but don't block task creation
       console.warn('Failed to schedule notification:', e);
+      Alert.alert('Scheduling failed', 'Could not schedule the reminder. Please check notification permissions.');
     }
   };
 
@@ -118,6 +94,12 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
 
     try {
       setIsSubmitting(true);
+      // If a due date is selected, enforce that a time is also selected
+      if (dueDate && !dueTime) {
+        Alert.alert('Reminder time required', 'Please select a reminder time for the chosen date.');
+        setIsSubmitting(false);
+        return;
+      }
       
       if (isEditMode) {
         // Optimistic update in Redux
@@ -138,6 +120,11 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           description: optimistic.description,
           dueDate: dueDate ?? null,
         }).catch(() => {});
+        // Reschedule local reminder: cancel old, then schedule if applicable
+        await cancelTaskReminder(existingTask.id);
+        if (dueDate && dueTime) {
+          await scheduleTaskNotification(existingTask.id, optimistic.title, dueDate, dueTime);
+        }
         // Navigate back immediately
         navigation.goBack();
         return;
@@ -176,6 +163,15 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
       Alert.alert('Error', 'Failed to save task. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    try {
+      await showImmediate('Test Notification', 'This is an immediate test notification.');
+      Alert.alert('Test sent', 'You should see a notification now.');
+    } catch (e) {
+      Alert.alert('Test failed', 'Could not show notification. Check app permissions.');
     }
   };
 
@@ -297,6 +293,46 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
             </View>
           )}
         </ScrollView>
+
+        {/* Test Notification Button */}
+        <View style={{ gap: 10, marginTop: 10 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Button title="Test Notification" onPress={handleTestNotification} />
+            <Button 
+              title="Test Scheduled (10s)" 
+              onPress={async () => {
+                try {
+                  const success = await testScheduledNotification();
+                  if (success) {
+                    Alert.alert(
+                      'Test Scheduled', 
+                      'A test notification is scheduled to appear in 10 seconds. Check console for details.'
+                    );
+                  } else {
+                    Alert.alert('Error', 'Failed to schedule test notification. Check console for errors.');
+                  }
+                } catch (e) {
+                  console.error('Test scheduled notification failed:', e);
+                  Alert.alert('Error', 'Failed to schedule test notification. Check console for errors.');
+                }
+              }} 
+            />
+          </View>
+          <Button 
+            title="List Pending Notifications" 
+            onPress={async () => {
+              try {
+                await listPendingNotifications();
+                Alert.alert('Check Console', 'Listed all pending notifications in the console.');
+              } catch (e) {
+                console.error('Failed to list pending notifications:', e);
+                Alert.alert('Error', 'Failed to list pending notifications. Check console for errors.');
+              }
+            }}
+            color="#666"
+          />
+        </View>
+
       </Screen>
 
       <View style={styles.footer}>
@@ -457,6 +493,16 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: '#495057',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  testButton: {
+    backgroundColor: '#6c757d',
+    margin: 16,
+    marginBottom: 0,
+  },
+  testButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },

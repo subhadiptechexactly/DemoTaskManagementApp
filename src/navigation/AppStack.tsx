@@ -1,13 +1,14 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MaterialIcons } from '@react-native-vector-icons/material-icons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootState } from '../redux/store';
 import { useSelector } from 'react-redux';
 import TaskListScreen from '../screens/Tasks/TaskListScreen';
 import TaskDetailScreen from '../screens/Tasks/TaskDetailScreen';
 import AddTaskScreen from '../screens/Tasks/AddTaskScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
+import TestNotificationScreen from '../screens/TestNotificationScreen';
 
 export type AppStackParamList = {
   Tasks: undefined;
@@ -15,6 +16,7 @@ export type AppStackParamList = {
   AddTask: { taskId?: string };
   Settings: undefined;
   TaskList: undefined;
+  TestNotification: undefined;
 };
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
@@ -31,6 +33,7 @@ const TaskStack = () => {
       <Stack.Screen name="Tasks" component={TaskListScreen} />
       <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
       <Stack.Screen name="AddTask" component={AddTaskScreen} />
+      <Stack.Screen name="TestNotification" component={TestNotificationScreen} options={{ title: 'Test Notifications' }} />
     </Stack.Navigator>
   );
 };
@@ -55,8 +58,34 @@ const AppStack = () => {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Tasks" component={TaskStack} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen 
+        name="Tasks" 
+        component={TaskStack} 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="format-list-bulleted" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="TestNotification" 
+        component={TestNotificationScreen} 
+        options={{
+          title: 'Test',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="notifications" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="settings" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };
