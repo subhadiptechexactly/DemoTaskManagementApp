@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Button } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Button, KeyboardAvoidingView, Platform } from 'react-native';
 import Screen from '../../components/Screen';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../navigation/AppStack';
@@ -167,12 +167,18 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <Screen>
+    <Screen>
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      >
         <ScrollView 
-          style={styles.container} 
-          contentContainerStyle={styles.scrollContent} 
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
         >
           <View style={styles.formGroup}>
             <Text style={styles.label}>Title *</Text>
@@ -283,53 +289,56 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
               )}
             </View>
           )}
+          
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="close" size={18} color="#495057" />
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[
+                styles.button, 
+                styles.submitButton, 
+                (!title.trim() || isSubmitting) && styles.buttonDisabled
+              ]}
+              onPress={handleSubmit}
+              disabled={!title.trim() || isSubmitting}
+              activeOpacity={0.9}
+            >
+              <MaterialIcons name={isEditMode ? 'save' : 'add'} size={18} color="#fff" />
+              <Text style={styles.submitButtonText}>
+                {isSubmitting 
+                  ? (isEditMode ? 'Updating...' : 'Adding...')
+                  : (isEditMode ? 'Update Task' : 'Add Task')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
-
-
-      </Screen>
-
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.button, styles.cancelButton]}
-          onPress={() => navigation.goBack()}
-          disabled={isSubmitting}
-          activeOpacity={0.8}
-        >
-          <MaterialIcons name="close" size={18} color="#495057" />
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[
-            styles.button, 
-            styles.submitButton, 
-            (!title.trim() || isSubmitting) && styles.buttonDisabled
-          ]}
-          onPress={handleSubmit}
-          disabled={!title.trim() || isSubmitting}
-          activeOpacity={0.9}
-        >
-          <MaterialIcons name={isEditMode ? 'save' : 'add'} size={18} color="#fff" />
-          <Text style={styles.submitButtonText}>
-            {isSubmitting 
-              ? (isEditMode ? 'Updating...' : 'Adding...')
-              : (isEditMode ? 'Update Task' : 'Add Task')}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  keyboardAvoidingView: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
   },
   scrollContent: {
+    flexGrow: 1,
     padding: 16,
-    paddingBottom: 80, // Space for the footer
+    paddingBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 20,
+    paddingHorizontal: 8,
   },
   formGroup: {
     marginBottom: 20,
