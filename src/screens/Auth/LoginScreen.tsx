@@ -8,11 +8,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootNavigator';
 import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
 import { loginUser } from '../../redux/slices/authSlice';
+import { useTheme } from '../../theme/ThemeContext';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { theme, isDark } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -46,8 +48,8 @@ const LoginScreen = () => {
     <Screen>
       <KeyboardAvoidingContainer contentContainerStyle={styles.content}>
         <View style={styles.headerWrap}>
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to continue managing your tasks</Text>
+          <Text style={[styles.title,{ color: isDark ? '#fff' : '#000'}]}>Welcome back</Text>
+          <Text style={[styles.subtitle,{ color: isDark ? '#fff' : '#000'}]}>Sign in to continue managing your tasks</Text>
         </View>
 
         <View style={styles.card}>
@@ -100,7 +102,7 @@ const LoginScreen = () => {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
+          <Text style={[styles.footerText,{ color: isDark ? '#fff' : '#000'}]}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Auth', { screen: 'Signup' } as any)}>
             <Text style={styles.footerLink}> Sign Up</Text>
           </TouchableOpacity>

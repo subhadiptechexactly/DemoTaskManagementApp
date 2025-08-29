@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootNavigator';
 import { useAppDispatch, useAppSelector, RootState } from '../../redux/store';
 import { registerUser } from '../../redux/slices/authSlice';
+import { useTheme } from '../../theme/ThemeContext';
 
 const styles = StyleSheet.create({
   container: {
@@ -131,6 +132,7 @@ type SignupScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 
 
 const SignupScreen = () => {
   const navigation = useNavigation<SignupScreenNavigationProp>();
+   const { theme, isDark } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -200,8 +202,8 @@ const SignupScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerWrap}>
-            <Text style={styles.title}>Create account</Text>
-            <Text style={styles.subtitle}>Sign up to get started with your tasks</Text>
+            <Text style={[styles.title, { color: isDark ? '#fff' : '#000'}]}>Create account</Text>
+            <Text style={[styles.subtitle,{ color: isDark ? '#fff' : '#000'}]}>Sign up to get started with your tasks</Text>
           </View>
   
           <View style={styles.card}>
@@ -296,7 +298,7 @@ const SignupScreen = () => {
           </View>
   
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account?</Text>
+            <Text style={[styles.footerText,{ color: isDark ? '#fff' : '#000'}]}>Already have an account?</Text>
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate('Auth', { screen: 'Login' } as any)
