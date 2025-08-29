@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
-import { MaterialIcons } from '@react-native-vector-icons/material-icons';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Screen from '../../components/Screen';
+import KeyboardAvoidingContainer from '../../components/KeyboardAvoidingContainer';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootNavigator';
@@ -43,7 +44,7 @@ const LoginScreen = () => {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingContainer contentContainerStyle={styles.content}>
         <View style={styles.headerWrap}>
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to continue managing your tasks</Text>
@@ -64,7 +65,7 @@ const LoginScreen = () => {
             />
           </View>
 
-          <Text style={[styles.label, { marginTop: 10 }]}>Password</Text>
+          <Text style={[styles.label, { marginTop: 6 }]}>Password</Text>
           <View style={styles.inputRow}>
             <MaterialIcons name="lock-outline" size={20} color="#64748b" />
             <TextInput
@@ -104,7 +105,7 @@ const LoginScreen = () => {
             <Text style={styles.footerLink}> Sign Up</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingContainer>
     </Screen>
   );
 };
@@ -112,33 +113,37 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#f6f7fb',
+    paddingBottom: 40,
   },
   title: {
-    fontSize: 30,
-    fontWeight: '800',
-    marginBottom: 6,
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 8,
     textAlign: 'left',
     color: '#0f172a',
+    letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#64748b',
-    marginBottom: 18,
+    lineHeight: 22,
   },
   headerWrap: {
-    marginBottom: 8,
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
   input: {
-    height: 48,
-    borderWidth: 0,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 0,
-    fontSize: 16,
+    flex: 1,
+    height: '100%',
+    fontSize: 15,
+    color: '#1e293b',
     backgroundColor: 'transparent',
+    padding: 0,
+    margin: 0,
   },
   label: {
     fontSize: 13,
@@ -147,21 +152,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 24,
+    marginTop: 20,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   button: {
     backgroundColor: '#2563eb',
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
+    shadowColor: '#2563eb',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   buttonDisabled: {
     backgroundColor: '#93c5fd',
@@ -181,12 +192,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    backgroundColor: '#f8fafc',
-    marginBottom: 14,
-    height: 48,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    backgroundColor: '#ffffff',
+    marginBottom: 16,
+    height: 50,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   inputFlex: {
     flex: 1,
@@ -194,7 +210,8 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 24,
+    marginBottom: 20,
   },
   footerText: {
     color: '#666',
