@@ -187,6 +187,8 @@ const TaskListScreen = ({ navigation }: TaskListScreenProps) => {
           ))}
         </View>
         <FlatList
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
           data={filtered}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}

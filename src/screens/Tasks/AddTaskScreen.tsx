@@ -9,7 +9,7 @@ import { getCurrentUserId } from '../../firebase/config';
 import { repoAddTask, repoUpdateTask } from '../../storage/offlineRepo';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { scheduleTaskReminder, cancelTaskReminder, showImmediate, testScheduledNotification, listPendingNotifications } from '../../notifications/NotificationService';
+import { scheduleTaskReminder, cancelTaskReminder } from '../../notifications/NotificationService';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'AddTask'>;
@@ -166,15 +166,6 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
     }
   };
 
-  const handleTestNotification = async () => {
-    try {
-      await showImmediate('Test Notification', 'This is an immediate test notification.');
-      Alert.alert('Test sent', 'You should see a notification now.');
-    } catch (e) {
-      Alert.alert('Test failed', 'Could not show notification. Check app permissions.');
-    }
-  };
-
   return (
     <View style={{ flex: 1 }}>
       <Screen>
@@ -294,44 +285,6 @@ const AddTaskScreen = ({ route, navigation }: Props) => {
           )}
         </ScrollView>
 
-        {/* Test Notification Button */}
-        <View style={{ gap: 10, marginTop: 10 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Button title="Test Notification" onPress={handleTestNotification} />
-            <Button 
-              title="Test Scheduled (10s)" 
-              onPress={async () => {
-                try {
-                  const success = await testScheduledNotification();
-                  if (success) {
-                    Alert.alert(
-                      'Test Scheduled', 
-                      'A test notification is scheduled to appear in 10 seconds. Check console for details.'
-                    );
-                  } else {
-                    Alert.alert('Error', 'Failed to schedule test notification. Check console for errors.');
-                  }
-                } catch (e) {
-                  console.error('Test scheduled notification failed:', e);
-                  Alert.alert('Error', 'Failed to schedule test notification. Check console for errors.');
-                }
-              }} 
-            />
-          </View>
-          <Button 
-            title="List Pending Notifications" 
-            onPress={async () => {
-              try {
-                await listPendingNotifications();
-                Alert.alert('Check Console', 'Listed all pending notifications in the console.');
-              } catch (e) {
-                console.error('Failed to list pending notifications:', e);
-                Alert.alert('Error', 'Failed to list pending notifications. Check console for errors.');
-              }
-            }}
-            color="#666"
-          />
-        </View>
 
       </Screen>
 

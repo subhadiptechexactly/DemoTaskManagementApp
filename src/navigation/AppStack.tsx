@@ -8,7 +8,6 @@ import TaskListScreen from '../screens/Tasks/TaskListScreen';
 import TaskDetailScreen from '../screens/Tasks/TaskDetailScreen';
 import AddTaskScreen from '../screens/Tasks/AddTaskScreen';
 import SettingsScreen from '../screens/Settings/SettingsScreen';
-import TestNotificationScreen from '../screens/TestNotificationScreen';
 
 export type AppStackParamList = {
   Tasks: undefined;
@@ -16,7 +15,6 @@ export type AppStackParamList = {
   AddTask: { taskId?: string };
   Settings: undefined;
   TaskList: undefined;
-  TestNotification: undefined;
 };
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
@@ -33,7 +31,6 @@ const TaskStack = () => {
       <Stack.Screen name="Tasks" component={TaskListScreen} />
       <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
       <Stack.Screen name="AddTask" component={AddTaskScreen} />
-      <Stack.Screen name="TestNotification" component={TestNotificationScreen} options={{ title: 'Test Notifications' }} />
     </Stack.Navigator>
   );
 };
@@ -67,16 +64,7 @@ const AppStack = () => {
           ),
         }}
       />
-      <Tab.Screen 
-        name="TestNotification" 
-        component={TestNotificationScreen} 
-        options={{
-          title: 'Test',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="notifications" size={size} color={color} />
-          ),
-        }}
-      />
+  
       <Tab.Screen 
         name="Settings" 
         component={SettingsScreen}
