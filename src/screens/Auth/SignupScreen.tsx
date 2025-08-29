@@ -189,98 +189,127 @@ const SignupScreen = () => {
 
   return (
     <Screen>
-      <KeyboardAvoidingContainer contentContainerStyle={styles.content}>
-        <View style={styles.headerWrap}>
-          <Text style={styles.title}>Create account</Text>
-          <Text style={styles.subtitle}>Sign up to get started with your tasks</Text>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.label}>Full name</Text>
-          <View style={styles.inputRow}>
-            <MaterialIcons name="person-outline" size={20} color="#64748b" />
-            <TextInput
-              style={[styles.input, styles.inputFlex]}
-              placeholder="John Doe"
-              value={name}
-              onChangeText={setName}
-              placeholderTextColor="#9aa4b2"
-            />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if header exists
+      >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.headerWrap}>
+            <Text style={styles.title}>Create account</Text>
+            <Text style={styles.subtitle}>Sign up to get started with your tasks</Text>
           </View>
-
-          <Text style={[styles.label, { marginTop: 10 }]}>Email</Text>
-          <View style={styles.inputRow}>
-            <MaterialIcons name="mail-outline" size={20} color="#64748b" />
-            <TextInput
-              style={[styles.input, styles.inputFlex]}
-              placeholder="you@example.com"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              placeholderTextColor="#9aa4b2"
-            />
-          </View>
-
-          <Text style={[styles.label, { marginTop: 10 }]}>Password</Text>
-          <View style={styles.inputRow}>
-            <MaterialIcons name="lock-outline" size={20} color="#64748b" />
-            <TextInput
-              style={[styles.input, styles.inputFlex]}
-              placeholder="Create a password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              placeholderTextColor="#9aa4b2"
-            />
-            <TouchableOpacity onPress={() => setShowPassword(p => !p)}>
-              <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={20} color="#64748b" />
+  
+          <View style={styles.card}>
+            <Text style={styles.label}>Full name</Text>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="person-outline" size={20} color="#64748b" />
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="John Doe"
+                value={name}
+                onChangeText={setName}
+                placeholderTextColor="#9aa4b2"
+              />
+            </View>
+  
+            <Text style={[styles.label, { marginTop: 10 }]}>Email</Text>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="mail-outline" size={20} color="#64748b" />
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="you@example.com"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholderTextColor="#9aa4b2"
+              />
+            </View>
+  
+            <Text style={[styles.label, { marginTop: 10 }]}>Password</Text>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="lock-outline" size={20} color="#64748b" />
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="Create a password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholderTextColor="#9aa4b2"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(p => !p)}>
+                <MaterialIcons
+                  name={showPassword ? 'visibility-off' : 'visibility'}
+                  size={20}
+                  color="#64748b"
+                />
+              </TouchableOpacity>
+            </View>
+  
+            <Text style={[styles.label, { marginTop: 10 }]}>Confirm password</Text>
+            <View style={[styles.inputRow, { marginBottom: 6 }]}>
+              <MaterialIcons name="lock-outline" size={20} color="#64748b" />
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirm}
+                placeholderTextColor="#9aa4b2"
+              />
+              <TouchableOpacity onPress={() => setShowConfirm(p => !p)}>
+                <MaterialIcons
+                  name={showConfirm ? 'visibility-off' : 'visibility'}
+                  size={20}
+                  color="#64748b"
+                />
+              </TouchableOpacity>
+            </View>
+  
+            {!!error && <Text style={styles.errorText}>{error}</Text>}
+  
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (isLoading || !name || !email || !password || !confirmPassword) &&
+                  styles.buttonDisabled,
+              ]}
+              onPress={handleSignup}
+              disabled={
+                isLoading || !name || !email || !password || !confirmPassword
+              }
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <View style={styles.buttonContent}>
+                  <MaterialIcons name="person-add" size={20} color="#fff" />
+                  <Text style={styles.buttonText}>Sign Up</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
-
-          <Text style={[styles.label, { marginTop: 10 }]}>Confirm password</Text>
-          <View style={[styles.inputRow, { marginBottom: 6 }]}>
-            <MaterialIcons name="lock-outline" size={20} color="#64748b" />
-            <TextInput
-              style={[styles.input, styles.inputFlex]}
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirm}
-              placeholderTextColor="#9aa4b2"
-            />
-            <TouchableOpacity onPress={() => setShowConfirm(p => !p)}>
-              <MaterialIcons name={showConfirm ? 'visibility-off' : 'visibility'} size={20} color="#64748b" />
+  
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account?</Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('Auth', { screen: 'Login' } as any)
+              }
+            >
+              <Text style={styles.footerLink}> Sign In</Text>
             </TouchableOpacity>
           </View>
-
-          {!!error && <Text style={styles.errorText}>{error}</Text>}
-
-          <TouchableOpacity
-            style={[styles.button, (isLoading || !name || !email || !password || !confirmPassword) && styles.buttonDisabled]}
-            onPress={handleSignup}
-            disabled={isLoading || !name || !email || !password || !confirmPassword}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <View style={styles.buttonContent}>
-                <MaterialIcons name="person-add" size={20} color="#fff" />
-                <Text style={styles.buttonText}>Sign Up</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Auth', { screen: 'Login' } as any)}>
-            <Text style={styles.footerLink}> Sign In</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingContainer>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
+  
 };
 
 
