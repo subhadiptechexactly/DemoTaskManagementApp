@@ -11,6 +11,12 @@
     <!-- Allow rescheduling alarms after reboot (Notifee handles internally if present) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission
+        android:name="${applicationId}.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
 
     <application
       android:name=".MainApplication"
@@ -51,5 +57,24 @@
           <action android:name="com.google.firebase.MESSAGING_EVENT" />
         </intent-filter>
       </service>
+      
+      <!-- Headless JS Service for handling notifications when app is killed -->
+      <service
+        android:name="com.facebook.react.HeadlessJsTaskService"
+        android:exported="false"
+        android:taskAffinity=""
+        android:permission="android.permission.BIND_JOB_SERVICE" />
+        
+      <!-- For handling scheduled notifications after reboot -->
+      <receiver
+        android:name="com.google.firebase.messaging.FirebaseMessagingReceiver"
+        android:enabled="true"
+        android:exported="true"
+        android:permission="com.google.android.c2dm.permission.SEND" >
+        <intent-filter>
+          <action android:name="com.google.firebase.MESSAGING_EVENT" />
+          <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+        </intent-filter>
+      </receiver>
     </application>
 </manifest>

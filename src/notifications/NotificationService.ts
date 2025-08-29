@@ -1,5 +1,6 @@
-import messaging from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, TimestampTrigger, TriggerType } from '@notifee/react-native';
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance, TimestampTrigger, TriggerType, EventType, Event } from '@notifee/react-native';
+import { AppState } from 'react-native';
 
 // Channel IDs
 export const FCM_CHANNEL_ID = 'messages';
@@ -16,6 +17,32 @@ export async function initNotifications() {
     
     // Request FCM permission
     await messaging().requestPermission();
+    
+    // Get FCM token
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+    
+    // Register background handler for FCM messages
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', remoteMessage);
+      await handleNotification(remoteMessage);
+    });
+    
+    // Handle notifications when the app is in the background or killed
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      const { notification } = detail;
+      console.log('Background event:', type, notification);
+      
+      if (type === EventType.PRESS) {
+        // Handle notification press
+        console.log('Notification pressed:', notification);
+      }
+    });
+    
+    // Handle notifications when the app is in the foreground
+    notifee.onForegroundEvent(({ type, detail }) => {
+      console.log('Foreground event:', type, detail.notification);
+    });
 
     // Create channels with detailed configuration
     const fcmChannel = await notifee.createChannel({ 
@@ -141,6 +168,36 @@ export async function testScheduledNotification() {
   }
 }
 
+
+// Handle incoming notifications
+async function handleNotification(remoteMessage: FirebaseMessagingTypes.RemoteMessage) {
+  const { notification, data } = remoteMessage;
+  
+  // Create a channel (required for Android)
+  const channelId = await notifee.createChannel({
+    id: 'default',
+    name: 'Default Channel',
+    importance: AndroidImportance.HIGH,
+    sound: 'default',
+  });
+
+  // Display a notification
+  await notifee.displayNotification({
+    title: notification?.title || 'New Notification',
+    body: notification?.body,
+    android: {
+      channelId,
+      pressAction: {
+        id: 'default',
+        launchActivity: 'default',
+      },
+      importance: AndroidImportance.HIGH,
+      smallIcon: 'ic_notification',
+      color: '#4a86e8',
+    },
+    data: data || {},
+  });
+}
 
 // Schedule a local reminder for a task
 export async function scheduleTaskReminder(taskId: string, title: string, date: Date | null, time: Date | null) {
